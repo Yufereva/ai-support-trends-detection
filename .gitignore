@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local secrets/config
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Logs / OS junk
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Streamlit local state
+.streamlit/secrets.toml
+
+# Local workspace artifacts that must not be published
+shared-data/
+log-analysis/
+trend-detection/
+WORKLOG.md
+PLATFORM_SPEC.md
+trend-detection/embeddings_cache.npz
+
+# Local database runtime files
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
