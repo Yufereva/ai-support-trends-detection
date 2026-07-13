@@ -2,7 +2,7 @@
 
 ## System Context
 
-AI Support Trends Detection is a local portfolio MVP. It helps a support operations reviewer identify recurring ticket themes, compare current and previous ticket volume, and prepare evidence-backed recommendations for Product and Engineering review.
+AI Support Trend Detection is a local portfolio MVP. It helps a support operations reviewer identify recurring ticket themes, compare current and previous ticket volume, and prepare evidence-backed recommendations for Product and Engineering review.
 
 The current implementation runs locally with a synthetic CSV dataset and does not connect to Zendesk, Jira, Slack, or any production system.
 

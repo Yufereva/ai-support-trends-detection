@@ -29,6 +29,7 @@ Thumbs.db
 .streamlit/secrets.toml
 
 # Local workspace artifacts that must not be published
+Private/
 shared-data/
 log-analysis/
 trend-detection/

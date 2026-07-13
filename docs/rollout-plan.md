@@ -1,6 +1,6 @@
 # Rollout Plan
 
-## Phase 1: Offline Prototype
+## Phase 1: Offline MVP
 
 Run local analysis on synthetic and historical exports. Validate schema, trend ranking, and reviewer-facing output.
 

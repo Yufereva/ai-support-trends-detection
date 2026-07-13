@@ -1,4 +1,4 @@
-"""Streamlit review interface for AI Support Trends Detection."""
+"""Streamlit review interface for AI Support Trend Detection."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from support_trend_detection.reporting import trend_to_markdown  # noqa: E402
 
 
 st.set_page_config(
-    page_title="AI Support Trends Detection",
+    page_title="AI Support Trend Detection",
     layout="wide",
 )
 
@@ -36,7 +36,7 @@ def render_metric(label: str, value: str | int, help_text: str | None = None) ->
 
 
 def main() -> None:
-    st.title("AI Support Trends Detection")
+    st.title("AI Support Trend Detection")
     st.caption(
         "Portfolio MVP for identifying emerging support ticket patterns and "
         "preparing evidence-backed Product and Engineering review."

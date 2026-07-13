@@ -1,4 +1,4 @@
-# AI Support Trends Detection
+# AI Support Trend Detection
 
 [![tests](https://github.com/Yufereva/ai-support-trends-detection/actions/workflows/tests.yml/badge.svg)](https://github.com/Yufereva/ai-support-trends-detection/actions/workflows/tests.yml)
 
@@ -8,11 +8,21 @@ AI-assisted workflow for detecting emerging support trends, recurring customer f
 
 > All sample data in this repository is synthetic. No customer or former employer data is included.
 
+## Screenshot
+
+![AI Support Trend Detection dashboard](assets/app-screenshot.png)
+
+## Why This Exists
+
+Support teams often discover customer pain before Product and Engineering because they see recurring friction directly in ticket queues. Those signals can remain fragmented across individual conversations, making it difficult to distinguish an emerging product issue from isolated support requests.
+
+AI Support Trend Detection surfaces those patterns earlier and turns them into evidence-based recommendations for Support Operations, Product, and Engineering. It is designed to strengthen human decision-making, not replace it: a responsible reviewer validates every trend before it becomes an escalation or operational action.
+
 ## Business Problem
 
 Support teams often see product friction before other teams do, but the signal is distributed across many individual tickets. Important patterns can remain anecdotal until a support leader manually reviews ticket queues, searches for similar cases, and assembles evidence for Product or Engineering.
 
-This prototype is designed to help Support Operations identify emerging customer friction earlier and produce reviewable, evidence-backed trend summaries.
+This portfolio application is designed to help Support Operations identify emerging customer friction earlier and produce reviewable, evidence-backed trend summaries.
 
 ## What The System Does
 
@@ -35,15 +45,11 @@ This prototype is designed to help Support Operations identify emerging customer
 
 ## Current Capabilities
 
-- [x] Synthetic support ticket dataset
-- [x] Local trend detection pipeline
-- [x] Streamlit review interface
-- [x] Evidence-backed trend output
-- [x] CSV upload with the same schema
-- [x] JSON and Markdown export
-- [x] Core pytest coverage
-- [x] Ruff lint configuration
-- [x] GitHub Actions quality checks
+- Detects emerging ticket clusters
+- Measures trend growth over time
+- Produces evidence-backed Product reports
+- Supports reviewer-uploaded ticket datasets
+- Exports findings as Markdown and JSON
 
 ## Example Detected Trend
 
@@ -65,19 +71,20 @@ These values are generated from synthetic data and should not be interpreted as 
 
 ```mermaid
 flowchart LR
-    A["Synthetic ticket CSV"] --> B["Schema validation"]
-    B --> C["Privacy redaction"]
-    C --> D["Text preprocessing"]
-    D --> E["TF-IDF vectorization"]
-    E --> F["KMeans clustering"]
-    F --> G["Trend scoring"]
-    G --> H["Evidence-backed report"]
-    H --> I["Streamlit review UI"]
+    A[Support Tickets] --> B[Data Validation]
+    B --> C[PII Redaction]
+    C --> D[Similarity Detection]
+    D --> E[Trend Detection]
+    E --> F[Evidence Collection]
+    F --> G[Product Report]
+    G --> H[Human Review]
 ```
+
+Implementation details, including the current TF-IDF and clustering baseline, are documented in [Architecture](docs/architecture.md).
 
 ## Business Value
 
-The prototype is intended to support:
+The MVP is intended to support:
 
 - earlier visibility into emerging customer friction;
 - reduced manual ticket review;
@@ -160,6 +167,8 @@ tests/                         Core pytest suite
 
 - [Architecture](docs/architecture.md)
 - [Product Requirements](docs/product-requirements.md)
+- [Product Workflow](docs/product-workflow.md)
+- [Future Agent Portfolio](docs/future-agents.md)
 - [Privacy and Responsible AI](docs/privacy-and-responsible-ai.md)
 - [Evaluation Framework](docs/evaluation-framework.md)
 - [Rollout Plan](docs/rollout-plan.md)
@@ -189,6 +198,16 @@ tests/                         Core pytest suite
 - [ ] Slack notifications
 - [ ] Scheduled trend monitoring
 - [ ] Human approval workflow
+
+## Future AI Agents
+
+This repository is the first module of a broader AI Support Operations Platform. Each planned agent will become its own portfolio project focused on a distinct operational problem:
+
+- **Trend Detection Agent (current):** identifies emerging customer friction and prepares evidence for Product and Engineering review.
+- **Knowledge Gap Agent:** finds recurring questions that indicate missing or ineffective help content.
+- **Repro Agent:** converts support evidence into structured, reviewable reproduction steps.
+- **Log Analysis Agent:** helps Support Engineering identify relevant errors and diagnostic signals.
+- **Incident Copilot:** supports incident coordination, evidence gathering, and stakeholder updates with human oversight.
 
 ## Related Portfolio Projects
 
