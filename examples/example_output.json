@@ -1,0 +1,324 @@
+[
+  {
+    "trend_id": "cluster-1",
+    "title": "CSV exports timing out for large datasets",
+    "classification": "Emerging product issue",
+    "current_volume": 55,
+    "previous_volume": 23,
+    "growth_rate": 1.391,
+    "product_areas": [
+      "reporting"
+    ],
+    "customer_tiers": {
+      "enterprise": 38,
+      "free": 5,
+      "pro": 12
+    },
+    "enterprise_ticket_count": 38,
+    "priority": "P1",
+    "confidence": "High",
+    "confidence_reason": "High volume and strong period-over-period growth.",
+    "summary": "CSV exports timing out for large datasets appeared in 55 current-period tickets versus 23 in the prior period (139% growth).",
+    "customer_impact": "Customers are reporting recurring csv exports timing out for large datasets friction in reporting. 38 current-period tickets came from enterprise-tier accounts.",
+    "recommended_action": "Open a Product/Engineering investigation for csv exports timing out for large datasets and review the supporting tickets before assigning operational priority.",
+    "supporting_ticket_ids": [
+      "TCK-1063",
+      "TCK-1050",
+      "TCK-1042",
+      "TCK-1030",
+      "TCK-1026",
+      "TCK-1038",
+      "TCK-1021",
+      "TCK-1061"
+    ],
+    "top_terms": [
+      "csv",
+      "export",
+      "csv export",
+      "reporting",
+      "large"
+    ]
+  },
+  {
+    "trend_id": "cluster-4",
+    "title": "SSO login failures",
+    "classification": "Emerging product issue",
+    "current_volume": 40,
+    "previous_volume": 14,
+    "growth_rate": 1.857,
+    "product_areas": [
+      "authentication"
+    ],
+    "customer_tiers": {
+      "enterprise": 18,
+      "free": 9,
+      "pro": 13
+    },
+    "enterprise_ticket_count": 18,
+    "priority": "P1",
+    "confidence": "High",
+    "confidence_reason": "High volume and strong period-over-period growth.",
+    "summary": "SSO login failures appeared in 40 current-period tickets versus 14 in the prior period (186% growth).",
+    "customer_impact": "Customers are reporting recurring sso login failures friction in authentication. 18 current-period tickets came from enterprise-tier accounts.",
+    "recommended_action": "Open a Product/Engineering investigation for sso login failures and review the supporting tickets before assigning operational priority.",
+    "supporting_ticket_ids": [
+      "TCK-1121",
+      "TCK-1118",
+      "TCK-1116",
+      "TCK-1111",
+      "TCK-1105",
+      "TCK-1101",
+      "TCK-1093",
+      "TCK-1096"
+    ],
+    "top_terms": [
+      "sso login",
+      "sso",
+      "login",
+      "authentication",
+      "redirect"
+    ]
+  },
+  {
+    "trend_id": "cluster-8",
+    "title": "Settings",
+    "classification": "Emerging product issue",
+    "current_volume": 28,
+    "previous_volume": 8,
+    "growth_rate": 2.5,
+    "product_areas": [
+      "mobile",
+      "onboarding",
+      "profile"
+    ],
+    "customer_tiers": {
+      "enterprise": 8,
+      "free": 5,
+      "pro": 15
+    },
+    "enterprise_ticket_count": 8,
+    "priority": "P2",
+    "confidence": "High",
+    "confidence_reason": "High volume and strong period-over-period growth.",
+    "summary": "Settings appeared in 28 current-period tickets versus 8 in the prior period (250% growth).",
+    "customer_impact": "Customers are reporting recurring settings friction in profile. 8 current-period tickets came from enterprise-tier accounts.",
+    "recommended_action": "Open a Product/Engineering investigation for settings and review the supporting tickets before assigning operational priority.",
+    "supporting_ticket_ids": [
+      "TCK-1395",
+      "TCK-1379",
+      "TCK-1404",
+      "TCK-1409",
+      "TCK-1405",
+      "TCK-1382",
+      "TCK-1371",
+      "TCK-1419"
+    ],
+    "top_terms": [
+      "profile",
+      "onboarding",
+      "settings",
+      "mobile",
+      "profile settings"
+    ]
+  },
+  {
+    "trend_id": "cluster-5",
+    "title": "Search performance degradation",
+    "classification": "Growing support friction",
+    "current_volume": 25,
+    "previous_volume": 13,
+    "growth_rate": 0.923,
+    "product_areas": [
+      "search"
+    ],
+    "customer_tiers": {
+      "enterprise": 6,
+      "free": 10,
+      "pro": 9
+    },
+    "enterprise_ticket_count": 6,
+    "priority": "P2",
+    "confidence": "High",
+    "confidence_reason": "High volume and strong period-over-period growth.",
+    "summary": "Search performance degradation appeared in 25 current-period tickets versus 13 in the prior period (92% growth).",
+    "customer_impact": "Customers are reporting recurring search performance degradation friction in search. 6 current-period tickets came from enterprise-tier accounts.",
+    "recommended_action": "Open a Product/Engineering investigation for search performance degradation and review the supporting tickets before assigning operational priority.",
+    "supporting_ticket_ids": [
+      "TCK-1242",
+      "TCK-1239",
+      "TCK-1235",
+      "TCK-1240",
+      "TCK-1228",
+      "TCK-1237",
+      "TCK-1241",
+      "TCK-1246"
+    ],
+    "top_terms": [
+      "search",
+      "large",
+      "expected filtering",
+      "filtering",
+      "filtering large"
+    ]
+  },
+  {
+    "trend_id": "cluster-3",
+    "title": "API rate-limit confusion",
+    "classification": "Growing support friction",
+    "current_volume": 22,
+    "previous_volume": 13,
+    "growth_rate": 0.692,
+    "product_areas": [
+      "api"
+    ],
+    "customer_tiers": {
+      "enterprise": 5,
+      "free": 10,
+      "pro": 7
+    },
+    "enterprise_ticket_count": 5,
+    "priority": "P2",
+    "confidence": "Medium",
+    "confidence_reason": "Moderate volume with a visible upward trend.",
+    "summary": "API rate-limit confusion appeared in 22 current-period tickets versus 13 in the prior period (69% growth).",
+    "customer_impact": "Customers are reporting recurring api rate-limit confusion friction in api. 5 current-period tickets came from enterprise-tier accounts.",
+    "recommended_action": "Open a Product/Engineering investigation for api rate-limit confusion and review the supporting tickets before assigning operational priority.",
+    "supporting_ticket_ids": [
+      "TCK-1161",
+      "TCK-1155",
+      "TCK-1154",
+      "TCK-1159",
+      "TCK-1163",
+      "TCK-1158",
+      "TCK-1152",
+      "TCK-1174"
+    ],
+    "top_terms": [
+      "limit",
+      "api",
+      "rate",
+      "rate limit",
+      "api rate"
+    ]
+  },
+  {
+    "trend_id": "cluster-0",
+    "title": "Billing invoice requests",
+    "classification": "Watchlist pattern",
+    "current_volume": 20,
+    "previous_volume": 20,
+    "growth_rate": 0.0,
+    "product_areas": [
+      "billing"
+    ],
+    "customer_tiers": {
+      "enterprise": 5,
+      "free": 6,
+      "pro": 9
+    },
+    "enterprise_ticket_count": 5,
+    "priority": "P3",
+    "confidence": "Low",
+    "confidence_reason": "Limited volume or weak growth; review manually before escalation.",
+    "summary": "Billing invoice requests appeared in 20 current-period tickets versus 20 in the prior period (0% growth).",
+    "customer_impact": "Customers are reporting recurring billing invoice requests friction in billing. 5 current-period tickets came from enterprise-tier accounts.",
+    "recommended_action": "Keep billing invoice requests on the Support Operations watchlist and review again after the next analysis window.",
+    "supporting_ticket_ids": [
+      "TCK-1205",
+      "TCK-1199",
+      "TCK-1206",
+      "TCK-1204",
+      "TCK-1192",
+      "TCK-1201",
+      "TCK-1194",
+      "TCK-1191"
+    ],
+    "top_terms": [
+      "billing",
+      "invoice",
+      "finance",
+      "invoice exports",
+      "billing invoice"
+    ]
+  },
+  {
+    "trend_id": "cluster-2",
+    "title": "Bulk action requests",
+    "classification": "Watchlist pattern",
+    "current_volume": 18,
+    "previous_volume": 14,
+    "growth_rate": 0.286,
+    "product_areas": [
+      "workflow"
+    ],
+    "customer_tiers": {
+      "enterprise": 6,
+      "free": 1,
+      "pro": 11
+    },
+    "enterprise_ticket_count": 6,
+    "priority": "P3",
+    "confidence": "Medium",
+    "confidence_reason": "Moderate volume with a visible upward trend.",
+    "summary": "Bulk action requests appeared in 18 current-period tickets versus 14 in the prior period (29% growth).",
+    "customer_impact": "Customers are reporting recurring bulk action requests friction in workflow. 6 current-period tickets came from enterprise-tier accounts.",
+    "recommended_action": "Keep bulk action requests on the Support Operations watchlist and review again after the next analysis window.",
+    "supporting_ticket_ids": [
+      "TCK-1356",
+      "TCK-1352",
+      "TCK-1349",
+      "TCK-1343",
+      "TCK-1341",
+      "TCK-1344",
+      "TCK-1359",
+      "TCK-1351"
+    ],
+    "top_terms": [
+      "bulk",
+      "bulk actions",
+      "workflow",
+      "actions",
+      "request"
+    ]
+  },
+  {
+    "trend_id": "cluster-7",
+    "title": "Slack integration disconnects",
+    "classification": "Watchlist pattern",
+    "current_volume": 16,
+    "previous_volume": 15,
+    "growth_rate": 0.067,
+    "product_areas": [
+      "integrations"
+    ],
+    "customer_tiers": {
+      "enterprise": 6,
+      "free": 3,
+      "pro": 7
+    },
+    "enterprise_ticket_count": 6,
+    "priority": "P3",
+    "confidence": "Low",
+    "confidence_reason": "Limited volume or weak growth; review manually before escalation.",
+    "summary": "Slack integration disconnects appeared in 16 current-period tickets versus 15 in the prior period (7% growth).",
+    "customer_impact": "Customers are reporting recurring slack integration disconnects friction in integrations. 6 current-period tickets came from enterprise-tier accounts.",
+    "recommended_action": "Keep slack integration disconnects on the Support Operations watchlist and review again after the next analysis window.",
+    "supporting_ticket_ids": [
+      "TCK-1302",
+      "TCK-1305",
+      "TCK-1311",
+      "TCK-1307",
+      "TCK-1312",
+      "TCK-1314",
+      "TCK-1315",
+      "TCK-1313"
+    ],
+    "top_terms": [
+      "slack",
+      "integration",
+      "slack integration",
+      "unexpectedly",
+      "posting integration"
+    ]
+  }
+]
