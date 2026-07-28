@@ -2,95 +2,56 @@
 
 ## Purpose
 
-AI Support Trend Detection helps Support Operations turn fragmented ticket signals into evidence that Product and Engineering can review. The current portfolio MVP runs as a standalone Streamlit application. Zendesk, CRM, Jira, Slack, and status-page connections described below are planned integration paths, not current production integrations.
+The application gives Support Operations an explainable path from one incoming ticket to a reviewable engineering escalation. It stays focused on one standalone agent project and uses local synthetic integrations.
 
-## Current MVP Workflow
-
-```mermaid
-flowchart LR
-    A[Ticket CSV] --> B[Validate and redact]
-    B --> C[Detect related themes]
-    C --> D[Measure growth]
-    D --> E[Rank customer impact]
-    E --> F[Review evidence]
-    F --> G[Export Product report]
-```
-
-1. A reviewer loads the included synthetic dataset or uploads a CSV with the documented schema.
-2. The application validates required fields, removes duplicate ticket IDs, and redacts obvious PII-like strings.
-3. Related tickets are grouped into themes.
-4. Current and previous periods are compared to identify emerging patterns.
-5. Trends are ranked using volume, growth, customer tier, and ticket priority.
-6. The reviewer inspects supporting ticket IDs, impact framing, confidence, and limitations.
-7. Approved findings are exported as Markdown or JSON for Product or Engineering review.
-
-The application stops at a reviewable recommendation. It does not automatically create incidents, contact customers, or assign engineering priority.
-
-## Planned Operational Workflow
+## Implemented Workflow
 
 ```mermaid
 flowchart LR
-    Z[Zendesk ticket or export] --> T[Trend Detection]
-    C[CRM account context] -.-> T
-    T --> R[Human review]
-    R -->|Approve| J[Jira draft]
-    R -->|Watch| S[Support watchlist]
-    R -->|Reject or revise| T
+    A[Incoming ticket] --> B[Automatic trend check]
+    B --> C{Three or more matches?}
+    C -->|No| D[Normal support handling]
+    C -->|Yes| E[Potential trend warning]
+    E --> F[Analyze ticket]
+    F --> G[Similar tickets and scores]
+    G --> H[Investigation dashboard]
+    H --> I[Filter and review evidence]
+    I --> J[Recalculate impact]
+    J --> K[Confirm reviewed trend]
+    K --> L[Local Jira backlog]
 ```
 
-The planned workflow has three operational surfaces:
+1. A ticket enters the local support queue or the FastAPI incoming webhook.
+2. The system compares it with same-category tickets from the previous seven days.
+3. A visible warning appears when at least three tickets meet the 60% similarity threshold.
+4. The agent selects **Analyze ticket** to inspect the strongest matches and synthetic customer impact.
+5. **Review full trend** opens a filterable table of every qualifying earlier ticket with its score, status, account tier, and match explanation.
+6. The reviewer includes or excludes individual tickets. Account counts, tier mix, ARR, evidence, ticket volume, and the engineering draft recalculate immediately.
+7. The operational timeline places support-volume events beside clearly labeled synthetic deployment context for correlation review; it does not claim causation.
+8. **Confirm trend and update Jira draft** persists the reviewed evidence set across page navigation.
+9. **Create or update Jira issue** writes the confirmed draft to the local Jira simulation without creating a duplicate issue for the same trigger ticket.
+10. **View Jira backlog** opens the locally simulated engineering queue.
 
-| Surface | Purpose | Current status |
-|---|---|---|
-| Support workspace | Analyze a ticket or scheduled export and show an early trend signal | Planned integration |
-| Trend review dashboard | Review cluster growth, customer impact, evidence, and recommended action | Represented by the current Streamlit MVP |
-| Engineering workflow | Create a pre-filled Jira draft after human approval | Planned integration |
-
-## Decision States
-
-A detected pattern should move through explicit review states:
-
-| State | Meaning | Expected action |
-|---|---|---|
-| Watch | Evidence is early or incomplete | Continue monitoring and collect more examples |
-| Review | Volume or impact warrants investigation | Assign a Support Operations or Product reviewer |
-| Approve | Evidence supports cross-functional action | Prepare a Product or Engineering escalation |
-| Revise | The theme is valid but the evidence or framing is incomplete | Correct the report and review again |
-| Reject | The pattern is noise, duplicate work, or not actionable | Record the decision and avoid escalation |
+Ordinary tickets remain in the queue without a warning. Boundary cases expose their similarity scores so reviewers can understand why they did or did not cross the threshold. Zendesk supports fast agent triage and escalation; the Dashboard supports cluster-level review across customers and tickets.
 
 ## Evidence Package
 
-Each reviewable trend should include:
+Each potential trend includes:
 
-- trend title and affected product area;
-- current and previous ticket volume;
-- period-over-period growth;
-- affected customer tiers and available account context;
-- supporting ticket IDs;
-- confidence explanation and known limitations;
-- recommended next action;
-- reviewer decision and timestamp.
+- trigger ticket and category;
+- time window, threshold, and qualifying match count;
+- top similar tickets with scores;
+- metadata-based explanations of why each ticket is a plausible match;
+- reviewer include/exclude decisions;
+- fictional affected accounts, tiers, and ARR;
+- ticket-volume and synthetic operational-event timelines;
+- sample subjects and ticket IDs;
+- a confirmed engineering summary and suggested priority.
 
-Future CRM enrichment may quantify affected accounts or revenue exposure. Any financial impact must come from authorized source data and remain clearly separated from model-generated interpretation.
+## Human Decision Points
 
-## Production Integration Path
+The application does not create a real external issue, declare an incident, or contact a customer. A reviewer decides whether each candidate belongs in the cluster, whether the warning represents one product issue, whether the impact framing is credible, and whether the reviewed draft should be escalated.
 
-The intended production path is incremental:
+## Future Production Path
 
-1. **Offline evaluation:** validate the workflow using synthetic or approved historical exports.
-2. **Shadow mode:** analyze fresh exports without creating operational actions.
-3. **Human-reviewed pilot:** allow reviewers to approve, revise, or reject recommendations.
-4. **Draft integrations:** create Jira drafts or Slack notifications only after approval.
-5. **Controlled rollout:** add access controls, audit logs, retention rules, monitoring, and operational ownership.
-
-For an embedded support workflow, a native Zendesk application could call a secured analysis API and open the review dashboard with the relevant evidence ID. This is a future architecture option and is not included in the current repository.
-
-## Success Measures
-
-- time required to identify a review-worthy trend;
-- evidence coverage per escalation;
-- reviewer acceptance and revision rates;
-- false-positive rate;
-- time saved compared with manual ticket review;
-- percentage of approved reports that lead to a Product or Engineering investigation.
-
+A production pilot would add authenticated ticket ingestion, approved CRM fields, a real Jira draft API, access controls, audit logs, retention rules, monitoring, and reviewer feedback. Those capabilities are outside this repository's current implementation.

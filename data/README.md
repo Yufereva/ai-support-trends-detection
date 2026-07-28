@@ -1,40 +1,32 @@
-# Synthetic Demo Dataset
+# Data
 
-`sample_tickets.csv` contains fictional support tickets created for this portfolio repository.
+## Published Synthetic Data
 
-No real customer, employer, account, email, or private URL data is included. The data is designed only to demonstrate trend detection behavior and should not be treated as production data.
+`synthetic/full_dataset.json` contains 1,500 fictional support tickets, conversations, accounts, and known evaluation labels. The generator creates recurring incidents, ordinary support questions, and boundary cases without copying customer data.
 
-## Included Patterns
+Supporting files include:
 
-The dataset intentionally includes recurring support themes:
+- `ticket-schema-v2.json`: JSON Schema for a ticket record;
+- `generate_full_dataset.py`: deterministic full-dataset generator;
+- `golden_sample.json`: smaller reviewed examples;
+- `golden_sample_review.md`: human-readable conversation review;
+- `evaluate_full_dataset.py`: labeled trend-detection evaluation;
+- `import_to_app.py`: reversible conversion into local runtime files.
 
-- CSV export failures or timeouts
-- SSO login failures
-- API rate-limit confusion
-- Billing invoice requests
-- Search performance degradation
-- Permissions confusion
-- Slack integration disconnects
-- Feature requests for bulk actions
-- Unrelated background tickets
+## Generated Runtime Data
 
-At least two themes increase in the most recent analysis period so the app can demonstrate period-over-period growth. Some tickets use the `enterprise` tier to support customer-impact framing.
+Run:
 
-## Schema
+```bash
+python data/synthetic/import_to_app.py apply
+```
 
-| Column | Description |
-|---|---|
-| `ticket_id` | Synthetic ticket identifier |
-| `created_at` | Ticket creation date |
-| `subject` | Short synthetic ticket subject |
-| `description` | Synthetic ticket description |
-| `product_area` | Product or workflow area |
-| `customer_tier` | `free`, `pro`, or `enterprise` |
-| `priority` | Synthetic support priority |
-| `status` | Synthetic ticket status |
-| `channel` | Synthetic support channel |
-| `tags` | Pipe-separated theme tags |
+This creates `data/runtime/tickets.db`, `accounts.json`, and `conversations.json`. Trend analysis later creates `embeddings_cache.npz`, while local Jira actions may create `jira_issues.json`. The entire runtime directory is ignored because it contains generated demo state.
 
-## Evaluation Use
+To restore the most recent local state saved by the importer:
 
-This dataset supports local testing of ingestion, privacy redaction, duplicate handling, clustering, trend scoring, and report generation. It is intentionally small enough for fast local review.
+```bash
+python data/synthetic/import_to_app.py restore
+```
+
+All names, emails, companies, request IDs, account values, and URLs use fictional demo values.

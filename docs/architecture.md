@@ -2,104 +2,64 @@
 
 ## System Context
 
-AI Support Trend Detection is a local portfolio MVP. It helps a support operations reviewer identify recurring ticket themes, compare current and previous ticket volume, and prepare evidence-backed recommendations for Product and Engineering review.
-
-The current implementation runs locally with a synthetic CSV dataset and does not connect to Zendesk, Jira, Slack, or any production system.
+AI Support Trend Detection is a local portfolio MVP with three demo surfaces: a Streamlit support workspace, a FastAPI analysis service, and a Zendesk sidebar iframe. They share the same embedding-based detection logic and synthetic runtime data.
 
 ```mermaid
 flowchart LR
-    A["Synthetic CSV tickets"] --> B["Schema validation"]
-    B --> C["Privacy redaction"]
-    C --> D["Text preprocessing"]
-    D --> E["TF-IDF vectorization"]
-    E --> F["KMeans clustering"]
-    F --> G["Trend scoring"]
-    G --> H["Evidence-backed reports"]
-    H --> I["Streamlit review UI"]
+    A[Published synthetic JSON] --> B[Reversible importer]
+    B --> C[(SQLite tickets)]
+    B --> D[Conversation and account JSON]
+    C --> E[Sentence-transformer embeddings]
+    E --> F[Similarity and trend rules]
+    D --> G[Customer-impact calculation]
+    F --> H[Streamlit helpdesk]
+    F --> I[FastAPI webhook]
+    F --> J[Trend dashboard]
+    G --> J
+    J --> K[Local Jira draft]
 ```
 
-## Input Data
+## Data Layer
 
-The default input is `data/sample_tickets.csv`. Reviewers may upload another CSV with the same schema from the Streamlit sidebar.
+`data/synthetic/full_dataset.json` is the reproducible source. `data/synthetic/import_to_app.py` validates the expected synthetic dataset and builds local files under ignored `data/runtime/`:
 
-Required fields are documented in `data/README.md`.
+- `tickets.db` for searchable ticket metadata;
+- `accounts.json` for fictional tier and ARR context;
+- `conversations.json` for ticket message threads;
+- `embeddings_cache.npz` after the first embedding run.
 
-## Schema Validation
+No generated database or embedding cache is committed.
 
-`src/support_trend_detection/ingestion.py` validates required columns, parses `created_at`, normalizes text fields, and rejects invalid dates or empty ticket IDs.
+## Similarity And Trend Rules
 
-## Preprocessing And Privacy Handling
+`similarity.py` embeds ticket subject and body with `all-MiniLM-L6-v2` and stores normalized vectors. Cosine similarity is therefore a matrix dot product.
 
-`privacy.py` redacts email-like strings, URLs, and account/customer ID patterns from ticket text before analysis. The committed sample data is already synthetic, but this redaction step demonstrates responsible handling for future inputs.
+For each trigger ticket, candidates must satisfy all of these conditions:
 
-`preprocessing.py` lowercases text, removes punctuation, and combines subject, description, product area, and tags into an analysis text field.
+- created in the previous seven days;
+- same support category as the trigger;
+- semantic similarity of at least 0.60;
+- not the trigger ticket itself.
 
-## Representation And Clustering
+Three or more candidates create a potential-trend warning. `detect_trends_batch` applies the same rules to the ticket queue without recomputing each matrix comparison separately.
 
-The current baseline uses:
+## Impact Layer
 
-- `TfidfVectorizer`
-- English stop-word removal
-- unigram and bigram features
-- deterministic `KMeans` clustering
+`impact.py` maps matching tickets to fictional accounts, deduplicates affected accounts, and summarizes customer tier and synthetic ARR at risk. These values demonstrate prioritization context; they are not forecasts.
 
-No paid API and no LLM are required.
+## Application Surfaces
 
-## Trend Scoring
+- `app.py` renders the Zendesk-style queue, ticket conversation, warning, analysis card, investigation dashboard, and Jira-style navigation.
+- `trend_view.py` manages the reviewed evidence set, filters, explanations, recalculated impact, and operational timeline.
+- `trend_review_store.py` persists confirmed reviews under ignored runtime data so Jira receives the same reviewed cluster after navigation.
+- `api/main.py` provides `/analyze`, `/tickets/{ticket_id}`, `/health`, and `/webhooks/tickets/incoming`.
+- `zendesk-app/` contains a local ZAF sidebar that calls the API.
+- `jira_view.py` reads committed seed issues and stores user-created demo issues in ignored `data/runtime/jira_issues.json`; it does not call Atlassian.
 
-`trend_scoring.py` compares the current analysis window with the previous window.
+## Failure Boundaries
 
-Signals include:
+The app requires imported runtime data. Unknown or stale Jira ticket references are handled without aborting the backlog view. An embedding model download is required on the first run unless it already exists in the local Hugging Face cache.
 
-- current-period volume
-- previous-period volume
-- period-over-period growth
-- enterprise-tier representation
-- affected product areas
-- confidence explanation
-- suggested priority
+## Human Review Boundary
 
-## Report Generation
-
-`reporting.py` formats detected trends as JSON and Markdown. The Streamlit app exposes download buttons for both.
-
-## Streamlit Interface
-
-`app.py` provides a reviewer-facing interface:
-
-- load included synthetic data by default
-- optionally upload a CSV
-- view dataset statistics
-- run trend analysis
-- review ranked trends
-- inspect evidence and recommended actions
-- download results
-
-## Local Cache Behavior
-
-The standalone MVP does not commit or require an embeddings cache. If future embedding-based analysis is added, generated cache files should remain ignored by Git.
-
-## Human Review
-
-The tool is designed to support review, not automate operational decisions. Priorities and recommended actions should be checked by a support leader or product partner before action.
-
-## Current Limitations
-
-- Synthetic data only.
-- Deterministic baseline clustering, not production ML.
-- No live Zendesk, Jira, or Slack integrations.
-- No multilingual evaluation.
-- No production security or access-control layer.
-
-## Future Architecture Considerations
-
-Future versions could add:
-
-- Zendesk ticket ingestion.
-- Jira issue export after human approval.
-- Slack notifications for watchlist trends.
-- Scheduled analysis.
-- LLM-assisted summary drafting.
-- Role-based access control and audit logs.
-
-These are future considerations and are not part of the current implementation.
+Warnings and engineering drafts are recommendations. A reviewer sees similarity evidence, can inspect and exclude source tickets, confirms the reviewed cluster, and remains responsible for escalation and priority decisions.

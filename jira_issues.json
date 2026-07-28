@@ -1,0 +1,808 @@
+{
+  "issues": [
+    {
+      "key": "ENG-101",
+      "type": "Bug",
+      "priority": "Urgent",
+      "summary": "Production API returning 429 for valid enterprise keys",
+      "description": "Support escalation context: 8 enterprise accounts hit rate limits despite Pro tier quotas. Logs show shared Redis counter not resetting at window boundary.",
+      "status": "In Progress",
+      "assignee": "Maria Santos",
+      "reporter": "Sarah Mitchell",
+      "labels": [
+        "support-escalation",
+        "api"
+      ],
+      "created": "2026-06-05",
+      "zendesk_ticket_count": 12,
+      "arr_at_risk": "$89K"
+    },
+    {
+      "key": "ENG-102",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "OAuth token refresh fails with invalid_grant after 24h",
+      "description": "Support escalation context: 14 tickets report users logged out daily. Refresh endpoint returns invalid_grant; access tokens expire but refresh tokens appear valid in DB.",
+      "status": "Open",
+      "assignee": "Maria Santos",
+      "reporter": "Rachel Stein",
+      "labels": [
+        "support-escalation",
+        "api"
+      ],
+      "created": "2026-05-12",
+      "zendesk_ticket_count": 14,
+      "arr_at_risk": "$45K"
+    },
+    {
+      "key": "ENG-103",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "GraphQL API auth middleware rejects Bearer tokens with scopes",
+      "description": "Support escalation context: REST API works; GraphQL returns 403 for same token. Started after deploy v2.4.2.",
+      "status": "Open",
+      "assignee": "Alex Chen",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "api"
+      ],
+      "created": "2026-05-28",
+      "zendesk_ticket_count": 6,
+      "arr_at_risk": "$45K"
+    },
+    {
+      "key": "ENG-104",
+      "type": "Task",
+      "priority": "Medium",
+      "summary": "Document API rate limit headers in developer portal",
+      "description": "Support escalation context: 19 tickets asking about X-RateLimit headers with no KB coverage.",
+      "status": "Done",
+      "assignee": "Nina Patel",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "api"
+      ],
+      "created": "2026-07-09",
+      "zendesk_ticket_count": 19
+    },
+    {
+      "key": "ENG-105",
+      "type": "Bug",
+      "priority": "Urgent",
+      "summary": "API gateway returning 502 on /v2/users bulk endpoint",
+      "description": "Support escalation context: Bulk user sync failing for 5 integration partners since 06:00 UTC.",
+      "status": "In Progress",
+      "assignee": "Elena Volkov",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "api"
+      ],
+      "created": "2026-06-27",
+      "zendesk_ticket_count": 5,
+      "arr_at_risk": "$45K"
+    },
+    {
+      "key": "ENG-106",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "Webhook signature validation failing for rotated secrets",
+      "description": "Support escalation context: Customers who rotated webhook secrets see 401 on delivery retries.",
+      "status": "Open",
+      "assignee": "James Wright",
+      "reporter": "Lisa Fontaine",
+      "labels": [
+        "support-escalation",
+        "api"
+      ],
+      "created": "2026-06-13",
+      "zendesk_ticket_count": 7
+    },
+    {
+      "key": "ENG-107",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Service account JWT expires immediately after issuance",
+      "description": "Support escalation context: Machine-to-machine auth broken in EU region only.",
+      "status": "In Progress",
+      "assignee": "David Chen",
+      "reporter": "Emily Nakamura",
+      "labels": [
+        "support-escalation",
+        "api"
+      ],
+      "created": "2026-05-28",
+      "zendesk_ticket_count": 9
+    },
+    {
+      "key": "ENG-108",
+      "type": "Story",
+      "priority": "Low",
+      "summary": "Add retry-after header to rate limit responses",
+      "description": "Support escalation context: Integrators cannot parse backoff timing from 429 responses.",
+      "status": "To Do",
+      "assignee": "Unassigned",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "api"
+      ],
+      "created": "2026-05-12",
+      "zendesk_ticket_count": 4
+    },
+    {
+      "key": "ENG-109",
+      "type": "Bug",
+      "priority": "Urgent",
+      "summary": "iOS app crash on launch — SIGABRT in CoreData migration",
+      "description": "Support escalation context: 34 crash reports from App Store Connect after v3.2.1.",
+      "status": "In Progress",
+      "assignee": "Elena Volkov",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "mobile"
+      ],
+      "created": "2026-06-15",
+      "zendesk_ticket_count": 34
+    },
+    {
+      "key": "ENG-110",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Android background sync killed by OS battery optimizer",
+      "description": "Support escalation context: 11 enterprise users miss offline data sync on Pixel devices.",
+      "status": "Open",
+      "assignee": "Ryan O'Brien",
+      "reporter": "Aisha Khan",
+      "labels": [
+        "support-escalation",
+        "mobile"
+      ],
+      "created": "2026-05-06",
+      "zendesk_ticket_count": 11
+    },
+    {
+      "key": "ENG-111",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "In-app notification badge count stuck at 99+",
+      "description": "Support escalation context: Badge counter not clearing after read; affects iOS 17+.",
+      "status": "Open",
+      "assignee": "Nina Patel",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "mobile"
+      ],
+      "created": "2026-06-18",
+      "zendesk_ticket_count": 8
+    },
+    {
+      "key": "ENG-112",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Deep links from push open blank WebView",
+      "description": "Support escalation context: Tapping notification opens app but target page is white screen.",
+      "status": "Open",
+      "assignee": "Maria Santos",
+      "reporter": "Rachel Stein",
+      "labels": [
+        "support-escalation",
+        "mobile"
+      ],
+      "created": "2026-06-07",
+      "zendesk_ticket_count": 15
+    },
+    {
+      "key": "ENG-113",
+      "type": "Bug",
+      "priority": "Urgent",
+      "summary": "Stripe webhook handler dropping invoice.paid events",
+      "description": "Support escalation context: 6 accounts show paid in Stripe but subscription still past_due.",
+      "status": "In Progress",
+      "assignee": "Ryan O'Brien",
+      "reporter": "Tom Berger",
+      "labels": [
+        "support-escalation",
+        "billing"
+      ],
+      "created": "2026-05-25",
+      "zendesk_ticket_count": 6
+    },
+    {
+      "key": "ENG-114",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "PayPal IPN verification failing after cert rotation",
+      "description": "Support escalation context: PayPal renewals not updating; 9 tickets since cert change.",
+      "status": "Open",
+      "assignee": "Alex Chen",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "billing"
+      ],
+      "created": "2026-06-07",
+      "zendesk_ticket_count": 9
+    },
+    {
+      "key": "ENG-115",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Usage metering webhook delayed 4+ hours",
+      "description": "Support escalation context: Overage charges applied incorrectly due to stale usage data.",
+      "status": "Open",
+      "assignee": "Priya Sharma",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "billing"
+      ],
+      "created": "2026-06-18",
+      "zendesk_ticket_count": 12,
+      "arr_at_risk": "$214"
+    },
+    {
+      "key": "ENG-116",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "Tax calculation webhook timeout on EU VAT rules",
+      "description": "Support escalation context: Checkout fails for DE/FR customers; Avalara callback times out.",
+      "status": "Open",
+      "assignee": "James Wright",
+      "reporter": "Tom Berger",
+      "labels": [
+        "support-escalation",
+        "billing"
+      ],
+      "created": "2026-06-15",
+      "zendesk_ticket_count": 5
+    },
+    {
+      "key": "ENG-117",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "CSV export timeout on datasets over 10k rows",
+      "description": "Support escalation context: Export job queue not scaling; 42 tickets at peak.",
+      "status": "Done",
+      "assignee": "Priya Sharma",
+      "reporter": "Aisha Khan",
+      "labels": [
+        "support-escalation",
+        "export"
+      ],
+      "created": "2026-05-10",
+      "zendesk_ticket_count": 42,
+      "arr_at_risk": "$89K"
+    },
+    {
+      "key": "ENG-118",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "Import wizard fails silently on UTF-8 BOM files",
+      "description": "Support escalation context: Excel-exported CSVs with BOM cause empty import with no error.",
+      "status": "Open",
+      "assignee": "Nina Patel",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "export"
+      ],
+      "created": "2026-05-21",
+      "zendesk_ticket_count": 7
+    },
+    {
+      "key": "ENG-119",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Bulk import duplicates records on retry",
+      "description": "Support escalation context: Idempotency key not honored; customers got 2x records.",
+      "status": "In Progress",
+      "assignee": "Marcus Webb",
+      "reporter": "Lisa Fontaine",
+      "labels": [
+        "support-escalation",
+        "export"
+      ],
+      "created": "2026-06-04",
+      "zendesk_ticket_count": 4
+    },
+    {
+      "key": "ENG-120",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "PDF export missing embedded fonts for CJK characters",
+      "description": "Support escalation context: Japanese customers receive garbled PDF reports.",
+      "status": "Open",
+      "assignee": "Nina Patel",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "export"
+      ],
+      "created": "2026-06-11",
+      "zendesk_ticket_count": 6
+    },
+    {
+      "key": "ENG-121",
+      "type": "Bug",
+      "priority": "Urgent",
+      "summary": "SAML SSO login fails after IdP certificate rotation",
+      "description": "Support escalation context: 58 tickets, 24 accounts; 503 on /api/auth/login post-deploy.",
+      "status": "In Progress",
+      "assignee": "Alex Chen",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "sso"
+      ],
+      "created": "2026-05-05",
+      "zendesk_ticket_count": 58
+    },
+    {
+      "key": "ENG-122",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Okta SCIM provisioning creates users in wrong org",
+      "description": "Support escalation context: Multi-tenant mapping broken; users land in default org.",
+      "status": "Open",
+      "assignee": "Elena Volkov",
+      "reporter": "Aisha Khan",
+      "labels": [
+        "support-escalation",
+        "sso"
+      ],
+      "created": "2026-05-09",
+      "zendesk_ticket_count": 10,
+      "arr_at_risk": "$214"
+    },
+    {
+      "key": "ENG-123",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Azure AD group sync not removing deactivated users",
+      "description": "Support escalation context: Offboarded employees retain access; 3 security escalations.",
+      "status": "Open",
+      "assignee": "Priya Sharma",
+      "reporter": "Kevin Brooks",
+      "labels": [
+        "support-escalation",
+        "sso"
+      ],
+      "created": "2026-06-20",
+      "zendesk_ticket_count": 3
+    },
+    {
+      "key": "ENG-124",
+      "type": "Story",
+      "priority": "Medium",
+      "summary": "Improve MFA reset self-service flow",
+      "description": "Support escalation context: 35 tickets about MFA device loss with no documented workaround.",
+      "status": "Open",
+      "assignee": "Marcus Webb",
+      "reporter": "Emily Nakamura",
+      "labels": [
+        "support-escalation",
+        "sso"
+      ],
+      "created": "2026-06-03",
+      "zendesk_ticket_count": 35
+    },
+    {
+      "key": "ENG-125",
+      "type": "Bug",
+      "priority": "Urgent",
+      "summary": "Dashboard load time 8s+ after v2.4.1 deploy",
+      "description": "Support escalation context: 20 tickets report timeouts; p95 latency up 400%.",
+      "status": "In Progress",
+      "assignee": "James Wright",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "performance"
+      ],
+      "created": "2026-07-08",
+      "zendesk_ticket_count": 20,
+      "arr_at_risk": "$285"
+    },
+    {
+      "key": "ENG-126",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Search index stale for 30+ minutes post-deploy",
+      "description": "Support escalation context: New records invisible in global search after releases.",
+      "status": "Open",
+      "assignee": "Ryan O'Brien",
+      "reporter": "Lisa Fontaine",
+      "labels": [
+        "support-escalation",
+        "performance"
+      ],
+      "created": "2026-06-16",
+      "zendesk_ticket_count": 8,
+      "arr_at_risk": "$89K"
+    },
+    {
+      "key": "ENG-127",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "Report generation CPU spike causing pod restarts",
+      "description": "Support escalation context: Scheduled reports fail during peak hours.",
+      "status": "Open",
+      "assignee": "Nina Patel",
+      "reporter": "Kevin Brooks",
+      "labels": [
+        "support-escalation",
+        "performance"
+      ],
+      "created": "2026-05-12",
+      "zendesk_ticket_count": 5
+    },
+    {
+      "key": "ENG-128",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Memory leak in websocket connection handler",
+      "description": "Support escalation context: Real-time updates stop after ~2h; requires pod restart.",
+      "status": "In Progress",
+      "assignee": "Alex Chen",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "performance"
+      ],
+      "created": "2026-05-20",
+      "zendesk_ticket_count": 6,
+      "arr_at_risk": "$285"
+    },
+    {
+      "key": "ENG-129",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Slack outbound webhook returns 500 on thread replies",
+      "description": "Support escalation context: Slack integration broken for threaded messages since API change.",
+      "status": "Open",
+      "assignee": "Ryan O'Brien",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "integrations"
+      ],
+      "created": "2026-06-19",
+      "zendesk_ticket_count": 11,
+      "arr_at_risk": "$412"
+    },
+    {
+      "key": "ENG-130",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Salesforce sync failing on custom object mappings",
+      "description": "Support escalation context: 7 enterprise accounts; Opportunity sync returns FIELD_INTEGRITY_EXCEPTION.",
+      "status": "In Progress",
+      "assignee": "Nina Patel",
+      "reporter": "Aisha Khan",
+      "labels": [
+        "support-escalation",
+        "integrations"
+      ],
+      "created": "2026-07-10",
+      "zendesk_ticket_count": 7
+    },
+    {
+      "key": "ENG-131",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "Microsoft Teams card actions not registering clicks",
+      "description": "Support escalation context: Adaptive card action URLs missing tenant context.",
+      "status": "Open",
+      "assignee": "Alex Chen",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "integrations"
+      ],
+      "created": "2026-07-08",
+      "zendesk_ticket_count": 4
+    },
+    {
+      "key": "ENG-132",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "HubSpot webhook retry storm exhausting rate limit",
+      "description": "Support escalation context: Failed deliveries retry without backoff; blocks other integrations.",
+      "status": "Open",
+      "assignee": "David Chen",
+      "reporter": "Tom Berger",
+      "labels": [
+        "support-escalation",
+        "integrations"
+      ],
+      "created": "2026-05-15",
+      "zendesk_ticket_count": 3,
+      "arr_at_risk": "$89K"
+    },
+    {
+      "key": "ENG-133",
+      "type": "Bug",
+      "priority": "Urgent",
+      "summary": "PostgreSQL connection pool exhausted under load",
+      "description": "Support escalation context: 503 errors on 40% of requests during business hours.",
+      "status": "In Progress",
+      "assignee": "Marcus Webb",
+      "reporter": "Sarah Mitchell",
+      "labels": [
+        "support-escalation",
+        "database"
+      ],
+      "created": "2026-06-03",
+      "zendesk_ticket_count": 18
+    },
+    {
+      "key": "ENG-134",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Read replica lag causing stale dashboard data",
+      "description": "Support escalation context: Users see data from 15+ minutes ago; 9 tickets.",
+      "status": "Open",
+      "assignee": "James Wright",
+      "reporter": "Rachel Stein",
+      "labels": [
+        "support-escalation",
+        "database"
+      ],
+      "created": "2026-05-14",
+      "zendesk_ticket_count": 9
+    },
+    {
+      "key": "ENG-135",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "[Trend] Webhook deliveries delayed in EU region",
+      "description": "Trend Detection escalation linked to trigger ticket T-20138. Similarity evidence and customer impact are populated from live analysis at runtime.",
+      "status": "Open",
+      "assignee": "Maria Santos",
+      "reporter": "Emily Nakamura",
+      "labels": [
+        "trend-warning",
+        "support-escalation",
+        "webhooks",
+        "delivery-delay"
+      ],
+      "created": "2026-07-10",
+      "trigger_ticket_id": "T-20138"
+    },
+    {
+      "key": "ENG-136",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Deadlock on concurrent user profile updates",
+      "description": "Support escalation context: 503 on PATCH /users/{id} when two admins edit same user.",
+      "status": "Open",
+      "assignee": "David Chen",
+      "reporter": "Rachel Stein",
+      "labels": [
+        "support-escalation",
+        "database"
+      ],
+      "created": "2026-05-26",
+      "zendesk_ticket_count": 5,
+      "arr_at_risk": "$89K"
+    },
+    {
+      "key": "ENG-137",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "Migration job locking tables during business hours",
+      "description": "Support escalation context: Schema migration ran at 14:00 UTC; caused 12 min outage.",
+      "status": "Done",
+      "assignee": "Nina Patel",
+      "reporter": "Rachel Stein",
+      "labels": [
+        "support-escalation",
+        "database"
+      ],
+      "created": "2026-05-01",
+      "zendesk_ticket_count": 12
+    },
+    {
+      "key": "ENG-138",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "[Trend] Billing invoice discrepancies across accounts",
+      "description": "Trend Detection escalation linked to trigger ticket T-0001. Similarity evidence and customer impact are populated from live analysis at runtime.",
+      "status": "Open",
+      "assignee": "Unassigned",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "trend-warning",
+        "support-escalation",
+        "billing"
+      ],
+      "created": "2026-07-09",
+      "trigger_ticket_id": "T-0001"
+    },
+    {
+      "key": "ENG-139",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "LaunchDarkly flag evaluation returns default for EU tenants",
+      "description": "Support escalation context: New checkout flow not visible to EU customers despite flag on.",
+      "status": "Open",
+      "assignee": "Ryan O'Brien",
+      "reporter": "Tom Berger",
+      "labels": [
+        "support-escalation",
+        "feature-flags"
+      ],
+      "created": "2026-07-02",
+      "zendesk_ticket_count": 8,
+      "arr_at_risk": "$214"
+    },
+    {
+      "key": "ENG-140",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "Feature flag cache not invalidating after toggle",
+      "description": "Support escalation context: Support enabled beta for customer; still sees old UI after 1h.",
+      "status": "Open",
+      "assignee": "David Chen",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "feature-flags"
+      ],
+      "created": "2026-05-08",
+      "zendesk_ticket_count": 6
+    },
+    {
+      "key": "ENG-141",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Percentage rollout stuck at 0% for canary cohort",
+      "description": "Support escalation context: Canary release not receiving traffic; blocks staged rollout.",
+      "status": "In Progress",
+      "assignee": "Priya Sharma",
+      "reporter": "Omar Hassan",
+      "labels": [
+        "support-escalation",
+        "feature-flags"
+      ],
+      "created": "2026-05-11",
+      "zendesk_ticket_count": 2,
+      "arr_at_risk": "$412"
+    },
+    {
+      "key": "ENG-143",
+      "type": "Bug",
+      "priority": "Low",
+      "summary": "Admin UI shows stale flag state vs evaluation API",
+      "description": "Support escalation context: Dashboard and API disagree on flag status; confuses support.",
+      "status": "To Do",
+      "assignee": "Maria Santos",
+      "reporter": "Rachel Stein",
+      "labels": [
+        "support-escalation",
+        "feature-flags"
+      ],
+      "created": "2026-05-17",
+      "zendesk_ticket_count": 3
+    },
+    {
+      "key": "ENG-144",
+      "type": "Bug",
+      "priority": "Urgent",
+      "summary": "Rolling deploy stuck — new pods failing readiness probe",
+      "description": "Support escalation context: Deploy v2.4.3 rolled back; readiness check hits wrong health endpoint.",
+      "status": "In Progress",
+      "assignee": "James Wright",
+      "reporter": "Kevin Brooks",
+      "labels": [
+        "support-escalation",
+        "kubernetes"
+      ],
+      "created": "2026-07-10",
+      "zendesk_ticket_count": 1,
+      "arr_at_risk": "$285"
+    },
+    {
+      "key": "ENG-145",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "HPA not scaling API pods during traffic spike",
+      "description": "Support escalation context: Manual scale needed; autoscaling metrics not collected.",
+      "status": "Open",
+      "assignee": "Priya Sharma",
+      "reporter": "Rachel Stein",
+      "labels": [
+        "support-escalation",
+        "kubernetes"
+      ],
+      "created": "2026-05-26",
+      "zendesk_ticket_count": 4
+    },
+    {
+      "key": "ENG-146",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "ConfigMap change not propagated to running pods",
+      "description": "Support escalation context: Updated SMTP settings ignored until manual pod restart.",
+      "status": "Open",
+      "assignee": "Elena Volkov",
+      "reporter": "Tom Berger",
+      "labels": [
+        "support-escalation",
+        "kubernetes"
+      ],
+      "created": "2026-06-26",
+      "zendesk_ticket_count": 5
+    },
+    {
+      "key": "ENG-147",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "Init container timeout on secret mount in staging",
+      "description": "Support escalation context: Staging deploys fail intermittently; blocks QA validation.",
+      "status": "Open",
+      "assignee": "Marcus Webb",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "kubernetes"
+      ],
+      "created": "2026-06-01",
+      "zendesk_ticket_count": 2
+    },
+    {
+      "key": "ENG-148",
+      "type": "Bug",
+      "priority": "High",
+      "summary": "Ingress routing sends 10% traffic to deprecated service",
+      "description": "Support escalation context: Canary weight misconfigured; some users hit v1 API.",
+      "status": "In Progress",
+      "assignee": "Priya Sharma",
+      "reporter": "Jake Rivera",
+      "labels": [
+        "support-escalation",
+        "kubernetes"
+      ],
+      "created": "2026-06-13",
+      "zendesk_ticket_count": 7,
+      "arr_at_risk": "$120"
+    },
+    {
+      "key": "ENG-149",
+      "type": "Bug",
+      "priority": "Medium",
+      "summary": "CronJob cleanup task deleting active session records",
+      "description": "Support escalation context: Users logged out en masse at 03:00 UTC daily.",
+      "status": "Open",
+      "assignee": "Ryan O'Brien",
+      "reporter": "Chris Donovan",
+      "labels": [
+        "support-escalation",
+        "kubernetes"
+      ],
+      "created": "2026-05-01",
+      "zendesk_ticket_count": 14
+    },
+    {
+      "key": "ENG-150",
+      "type": "Task",
+      "priority": "Low",
+      "summary": "Add runbook link to deploy failure alerts",
+      "description": "Support escalation context: On-call lacks context when PagerDuty fires for deploy failures.",
+      "status": "To Do",
+      "assignee": "Maria Santos",
+      "reporter": "Sarah Mitchell",
+      "labels": [
+        "support-escalation",
+        "kubernetes"
+      ],
+      "created": "2026-05-30",
+      "zendesk_ticket_count": 1
+    }
+  ]
+}

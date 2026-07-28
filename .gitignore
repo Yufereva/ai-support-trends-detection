@@ -3,11 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+pytest-cache-files-*/
 .mypy_cache/
 .ruff_cache/
 
 # Virtual environments
 .venv/
+.venv-clean/
+.tmp/
 venv/
 env/
 
@@ -35,7 +38,10 @@ log-analysis/
 trend-detection/
 WORKLOG.md
 PLATFORM_SPEC.md
-trend-detection/embeddings_cache.npz
+
+# Generated application state (recreated from data/synthetic/full_dataset.json)
+data/runtime/
+embeddings_cache.npz
 
 # Local database runtime files
 *.db
