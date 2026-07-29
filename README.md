@@ -6,7 +6,7 @@ A standalone portfolio application that detects emerging support-ticket trends a
 
 ## Why This Matters
 
-Support teams often see product issues before anyone else does, but those signals get buried inside ticket volume. This prototype shows how AI can help Support Ops detect repeated customer problems earlier, package the evidence, and create a reviewable escalation for Product and Engineering.
+Support teams often see product issues before anyone else does, but those signals get buried inside ticket volume. This project shows how AI can help Support Ops detect repeated customer problems earlier, package the evidence, and create a reviewable escalation for Product and Engineering.
 
 **Project status:** Portfolio MVP
 
@@ -15,6 +15,12 @@ Support teams often see product issues before anyone else does, but those signal
 ## Screenshot
 
 ![AI Support Trend Detection dashboard](assets/app-screenshot.png)
+
+## Demo
+
+A full walkthrough of the T-20179 SCIM/identity trend, from the ticket flagging a potential trend through evidence review to Jira draft creation (all data synthetic).
+
+[Watch the demo video](assets/demo-video.mp4)
 
 ## Product Workflow
 
@@ -51,6 +57,8 @@ The application checks incoming tickets against the previous seven days of ticke
 - Regression tests for trend, non-trend, boundary, incoming-warning, and stale-Jira cases.
 
 ## Demo Scenario
+
+Fastest way to try it: run the app, open ticket T-20119, and follow the Trend Detection warning into the Jira draft flow.
 
 1. Use one of the suggested demo tickets in the sidebar.
 2. The app checks whether similar tickets appeared in the previous seven days.
