@@ -4,6 +4,10 @@
 
 A standalone portfolio application that detects emerging support-ticket trends and turns them into reviewable evidence for Support Operations, Product, and Engineering.
 
+## Why This Matters
+
+Support teams often see product issues before anyone else does, but those signals get buried inside ticket volume. This prototype shows how AI can help Support Ops detect repeated customer problems earlier, package the evidence, and create a reviewable escalation for Product and Engineering.
+
 **Project status:** Portfolio MVP
 
 > Every ticket, account, person, company, URL, and identifier committed here is synthetic. No customer or employer data is included.
@@ -45,6 +49,36 @@ The application checks incoming tickets against the previous seven days of ticke
 - Local Jira-style backlog and issue view; no real Atlassian issue is created.
 - Zendesk App Framework sidebar demo backed by the local API.
 - Regression tests for trend, non-trend, boundary, incoming-warning, and stale-Jira cases.
+
+## Demo Scenario
+
+1. Use one of the suggested demo tickets in the sidebar.
+2. The app checks whether similar tickets appeared in the previous seven days.
+3. If a potential trend is detected, open the investigation dashboard.
+4. Review the matching tickets, include or exclude evidence, and generate a local Jira-style escalation draft.
+
+## Example Escalation Package
+
+This is the kind of package the agent hands to Product and Engineering once a trend is confirmed. It reflects the actual demo dataset — open ticket `T-20119` in the app to reproduce it.
+
+**Pattern**
+API key rotation leaves production authentication broken, even though the same request succeeds in test.
+
+**Evidence**
+- 17 similar tickets detected (≥60% semantic similarity)
+- 18 total linked tickets across 16 unique accounts
+- 9 enterprise accounts affected
+
+**Customer impact**
+Est. $979K ARR at risk (synthetic Salesforce data).
+
+**Representative examples**
+- T-20119: Production blocked: api rotation left production authentication broken.
+- T-20114: After configuration change: api rotation left production authentication broken.
+- T-20104: API rotation left production authentication broken.
+
+**Suggested next step**
+Product and Engineering review.
 
 ## Quick Start
 
