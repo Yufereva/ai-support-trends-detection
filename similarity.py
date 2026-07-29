@@ -1,5 +1,6 @@
 """Embedding-based ticket similarity, trend detection, and engineering ticket drafts."""
 
+import hashlib
 import json
 import sqlite3
 from datetime import datetime, timedelta
@@ -18,6 +19,18 @@ SIMILARITY_THRESHOLD = 0.60
 TREND_MIN_COUNT = 3
 TREND_WINDOW_DAYS = 7
 MODEL_NAME = "all-MiniLM-L6-v2"
+
+
+def ticket_db_fingerprint(db_path: Path | None = None) -> str:
+    """Hash of ticket IDs, used to invalidate Streamlit/API embedding caches."""
+    path = db_path or DB_PATH
+    if not path.exists():
+        return "missing"
+    connection = sqlite3.connect(path)
+    rows = connection.execute("SELECT id FROM tickets ORDER BY id").fetchall()
+    connection.close()
+    payload = ",".join(row[0] for row in rows).encode("utf-8")
+    return hashlib.sha1(payload).hexdigest()
 
 
 def load_tickets(db_path: Path | None = None) -> list[dict]:
@@ -178,17 +191,32 @@ def detect_trends_batch(
     min_count: int = TREND_MIN_COUNT,
     window_days: int = TREND_WINDOW_DAYS,
 ) -> dict[str, dict]:
-    """Check selected tickets against the full history in one matrix operation."""
+    """Check selected tickets against the full history in one matrix operation.
+
+    Ticket IDs absent from the embedding cache (for example Knowledge Gap
+    rows in the shared Zendesk DB) are skipped instead of crashing the queue.
+    """
     if not ticket_ids:
         return {}
 
-    indices = [_index_for_id(cache, ticket_id) for ticket_id in ticket_ids]
+    id_to_idx = {ticket_id: index for index, ticket_id in enumerate(cache.get("ids", []))}
+    valid_ids: list[str] = []
+    indices: list[int] = []
+    for ticket_id in ticket_ids:
+        idx = id_to_idx.get(ticket_id)
+        if idx is None:
+            continue
+        valid_ids.append(ticket_id)
+        indices.append(idx)
+    if not valid_ids:
+        return {}
+
     queries = cache["embeddings"][indices]
     scores = cache["embeddings"] @ queries.T
     matches = scores >= threshold
 
     results = {}
-    for column, (ticket_id, idx) in enumerate(zip(ticket_ids, indices, strict=True)):
+    for column, (ticket_id, idx) in enumerate(zip(valid_ids, indices, strict=True)):
         same_category = np.array(cache["categories"]) == cache["categories"][idx]
         ticket_matches = (
             matches[:, column]

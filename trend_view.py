@@ -23,6 +23,7 @@ from similarity import (
     format_engineering_ticket_text,
     generate_engineering_ticket,
     score_similar_tickets,
+    ticket_db_fingerprint,
 )
 from trend_review_store import load_confirmed_review, save_confirmed_review
 
@@ -199,8 +200,13 @@ TREND_CSS = """
 
 
 @st.cache_resource(show_spinner="Loading embeddings for trend dashboard...")
-def _get_cache() -> dict:
+def _get_cache(fingerprint: str = "") -> dict:
+    _ = fingerprint
     return compute_embeddings()
+
+
+def _active_cache() -> dict:
+    return _get_cache(ticket_db_fingerprint())
 
 
 @st.cache_data
@@ -642,7 +648,7 @@ def render_trend_dashboard(ticket_id: str | None = None):
         _render_missing_ticket(ticket_id)
         return
 
-    cache = _get_cache()
+    cache = _active_cache()
     detected_trend = detect_trend(cache, ticket_id)
     cluster_ids = tuple(dict.fromkeys([ticket_id, *detected_trend["similar_ids"]]))
     full_ticket_index = _get_ticket_index(cluster_ids)

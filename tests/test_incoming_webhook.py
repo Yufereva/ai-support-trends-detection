@@ -43,7 +43,7 @@ def test_incoming_webhook_runs_automatic_trend_check(monkeypatch):
             "2026-07-10T09:00:00",
         ],
     }
-    monkeypatch.setattr(api_main, "get_cache", lambda: cache)
+    monkeypatch.setattr(api_main, "active_cache", lambda: cache)
     monkeypatch.setattr(api_main, "calculate_customer_impact", lambda *_: {})
     monkeypatch.setattr(
         api_main,

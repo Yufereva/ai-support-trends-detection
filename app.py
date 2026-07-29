@@ -12,6 +12,12 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from escalation_quality_bridge import format_quality_summary, score_draft
+from impact import calculate_customer_impact, format_arr, load_accounts
+from jira_view import (
+    JIRA_CSS,
+    jira_view_in_jira_link,
+    render_jira_view,
+)
 from similarity import (
     DB_PATH,
     compute_embeddings,
@@ -20,15 +26,10 @@ from similarity import (
     find_similar,
     format_engineering_ticket_text,
     generate_engineering_ticket,
+    ticket_db_fingerprint,
 )
-from impact import calculate_customer_impact, format_arr, load_accounts
-from jira_view import (
-    JIRA_CSS,
-    jira_view_in_jira_link,
-    render_jira_view,
-)
-from trend_view import render_trend_dashboard, trend_dashboard_url
 from trend_review_store import load_confirmed_review
+from trend_view import render_trend_dashboard, trend_dashboard_url
 
 ROOT = Path(__file__).resolve().parent
 DEMO_PATH = ROOT / "demo_scenarios.json"
@@ -1580,13 +1581,31 @@ def list_tickets(
 
 
 @st.cache_resource(show_spinner="Loading embeddings (first run may take a minute)...")
-def get_cache():
+def get_cache(fingerprint: str = ""):
+    _ = fingerprint
     return compute_embeddings()
 
 
+def active_cache() -> dict:
+    return get_cache(ticket_db_fingerprint())
+
+
 @st.cache_data(show_spinner=False)
-def get_trend_signals(ticket_ids: tuple[str, ...]) -> dict[str, dict]:
-    return detect_trends_batch(get_cache(), ticket_ids)
+def get_trend_signals(ticket_ids: tuple[str, ...], fingerprint: str = "") -> dict[str, dict]:
+    return detect_trends_batch(get_cache(fingerprint), ticket_ids)
+
+
+def _empty_trend(ticket_id: str, subject: str = "", category: str = "") -> dict:
+    return {
+        "is_potential_trend": False,
+        "similar_count": 0,
+        "threshold": 0.60,
+        "min_count": 3,
+        "window_days": 7,
+        "similar_ids": [],
+        "category": category,
+        "subject": subject or ticket_id,
+    }
 
 
 @st.cache_data
@@ -1614,7 +1633,10 @@ def load_demo_scenarios() -> list[dict]:
 
 
 def run_analysis(ticket_id: str):
-    cache = get_cache()
+    cache = active_cache()
+    if ticket_id not in cache["ids"]:
+        # Defensive fallback for an externally modified or partially rebuilt cache.
+        return [], _empty_trend(ticket_id), calculate_customer_impact([], ticket_id)
     similar = find_similar(cache, ticket_id, top_k=5)
     trend = detect_trend(cache, ticket_id)
     impact = calculate_customer_impact(trend["similar_ids"], ticket_id)
@@ -2382,7 +2404,7 @@ def fetch_analysis_from_api(ticket_id: str) -> dict:
             engineering_draft_text = None
             if trend["is_potential_trend"]:
                 engineering_draft = generate_engineering_ticket(
-                    get_cache(), ticket_id, trend, similar, impact
+                    active_cache(), ticket_id, trend, similar, impact
                 )
                 engineering_draft_text = format_engineering_ticket_text(
                     engineering_draft
@@ -2683,7 +2705,7 @@ def render_agent_panel(ticket_id: str):
     similar = results["similar"]
     trend = results["trend"]
     impact = results.get("impact")
-    cache = get_cache()
+    cache = active_cache()
 
     if trend["is_potential_trend"]:
         st.markdown(
@@ -2865,7 +2887,11 @@ def main():
     )
 
     if not is_detail and tickets:
-        trend_signals = get_trend_signals(tuple(t["id"] for t in tickets))
+        fingerprint = ticket_db_fingerprint()
+        trend_signals = get_trend_signals(
+            tuple(t["id"] for t in tickets),
+            fingerprint,
+        )
         for ticket_row in tickets:
             ticket_row["trend_signal"] = trend_signals.get(ticket_row["id"], {})
 

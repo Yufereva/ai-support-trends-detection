@@ -7,3 +7,10 @@ alwaysApply: true
 
 Do not use the em dash character in UI copy, documentation, comments, code, or responses.
 Use a period, comma, colon, semicolon, or parentheses instead.
+
+Two clarifications:
+
+- Fix em dashes in copy you are already editing. Do not sweep through untouched
+  files just to remove them.
+- The standalone dash used as an empty-value placeholder in the Zendesk-style
+  tables in `app.py` is a UI glyph, not punctuation. Leave it alone.

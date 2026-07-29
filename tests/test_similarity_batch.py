@@ -1,6 +1,32 @@
+import sys
+from types import SimpleNamespace
+
 import numpy as np
 
-from similarity import detect_trends_batch, score_similar_tickets
+import similarity
+from similarity import (
+    compute_embeddings,
+    detect_trends_batch,
+    score_similar_tickets,
+    ticket_db_fingerprint,
+)
+
+
+def test_ticket_db_fingerprint_changes_when_membership_changes(tmp_path):
+    db_path = tmp_path / "tickets.db"
+    connection = __import__("sqlite3").connect(db_path)
+    connection.execute("CREATE TABLE tickets (id TEXT PRIMARY KEY)")
+    connection.execute("INSERT INTO tickets (id) VALUES ('T-1'), ('T-30001')")
+    connection.commit()
+    before = ticket_db_fingerprint(db_path)
+
+    connection.execute("INSERT INTO tickets (id) VALUES ('T-30002')")
+    connection.commit()
+    connection.close()
+    after = ticket_db_fingerprint(db_path)
+
+    assert before != after
+    assert ticket_db_fingerprint(tmp_path / "missing.db") == "missing"
 
 
 def test_score_similar_tickets_returns_only_requested_candidates():
@@ -73,6 +99,73 @@ def test_detect_trends_batch_ignores_future_and_old_matches():
 
 def test_detect_trends_batch_handles_empty_queue():
     assert detect_trends_batch({}, ()) == {}
+
+
+def test_detect_trends_batch_skips_ids_missing_from_cache():
+    cache = {
+        "ids": ["T-1", "T-2"],
+        "embeddings": np.array(
+            [
+                [1.0, 0.0],
+                [0.995, 0.1],
+            ]
+        ),
+        "subjects": ["API key", "API token"],
+        "categories": ["api", "api"],
+        "created_at": ["2026-07-01T09:00:00", "2026-07-01T10:00:00"],
+    }
+
+    signals = detect_trends_batch(
+        cache,
+        ("T-1", "T-30026", "T-2"),
+        threshold=0.9,
+        min_count=1,
+    )
+
+    assert "T-30026" not in signals
+    assert signals["T-2"]["is_potential_trend"] is True
+
+
+def test_compute_embeddings_includes_every_shared_ticket(tmp_path, monkeypatch):
+    tickets = [
+        {
+            "id": "T-1",
+            "subject": "API issue",
+            "body": "Production request fails",
+            "category": "api",
+            "priority": "high",
+            "created_at": "2026-07-01T09:00:00",
+            "tags": ["api"],
+        },
+        {
+            "id": "T-30026",
+            "subject": "How do I export data?",
+            "body": "I cannot find the documentation",
+            "category": "documentation",
+            "priority": "medium",
+            "created_at": "2026-07-01T10:00:00",
+            "tags": ["knowledge-gap", "doc-question"],
+        },
+    ]
+
+    class FakeModel:
+        def __init__(self, _name):
+            pass
+
+        def encode(self, texts, **_kwargs):
+            return np.array([[1.0, 0.0] for _ in texts])
+
+    monkeypatch.setattr(similarity, "CACHE_PATH", tmp_path / "embeddings_cache.npz")
+    monkeypatch.setattr(similarity, "RUNTIME_PATH", tmp_path)
+    monkeypatch.setitem(
+        sys.modules,
+        "sentence_transformers",
+        SimpleNamespace(SentenceTransformer=FakeModel),
+    )
+
+    cache = compute_embeddings(tickets=tickets)
+
+    assert cache["ids"] == ["T-1", "T-30026"]
 
 
 def test_detect_trends_batch_does_not_mix_categories():

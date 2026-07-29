@@ -29,6 +29,7 @@ from similarity import (  # noqa: E402
     format_engineering_ticket_text,
     generate_engineering_ticket,
     load_tickets,
+    ticket_db_fingerprint,
 )
 
 app = FastAPI(title="Trend Detection API", version="1.0.0")
@@ -42,9 +43,14 @@ app.add_middleware(
 )
 
 
-@lru_cache(maxsize=1)
-def get_cache() -> dict:
+@lru_cache(maxsize=4)
+def get_cache(fingerprint: str = "") -> dict:
+    _ = fingerprint
     return compute_embeddings()
+
+
+def active_cache() -> dict:
+    return get_cache(ticket_db_fingerprint())
 
 
 def _encode_text(subject: str, body: str) -> np.ndarray:
@@ -194,7 +200,7 @@ def get_ticket(ticket_id: str) -> dict[str, Any]:
 
 @app.post("/analyze")
 def analyze(req: AnalyzeRequest) -> dict[str, Any]:
-    cache = get_cache()
+    cache = active_cache()
 
     if req.ticket_id:
         try:
