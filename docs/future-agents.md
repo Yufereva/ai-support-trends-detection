@@ -38,11 +38,12 @@ AI Support Trend Detection is the first planned module in a portfolio of standal
 
 **Outputs:** ranked knowledge gaps, supporting ticket examples, matched or missing articles, and a draft content brief.
 
-**Status:** planned standalone repository.
+**Status:** standalone repository:
+[ai-knowledge-gap-agent](https://github.com/Yufereva/ai-knowledge-gap-agent).
 
 ## Escalation Quality Agent
 
-**Operational question:** Is this support→engineering escalation draft complete enough to hand to Engineering?
+**Operational question:** Is this support-to-engineering escalation draft complete enough to hand to Engineering?
 
 **Responsibilities:**
 
@@ -55,7 +56,10 @@ AI Support Trend Detection is the first planned module in a portfolio of standal
 
 **Outputs:** score, verdict (`ready` / `needs_work` / `poor`), per-check pass/fail detail, and a short recommendation.
 
-**Status:** portfolio MVP in `escalation-quality-agent/`, linked from Trend Detection UI.
+**Status:** standalone repository:
+[ai-escalation-quality-agent](https://github.com/Yufereva/ai-escalation-quality-agent).
+This repository keeps a local copy of the scoring module for the Trend Detection
+Create-in-Jira soft gate.
 
 ## Log Analysis Agent
 

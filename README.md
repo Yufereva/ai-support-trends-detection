@@ -209,12 +209,17 @@ The application drafts evidence; it does not autonomously declare incidents, set
 - No production security, access-control, retention, or monitoring layer.
 - Suggested impact and priority require human validation.
 
+## Related Portfolio Projects
+
+- [AI Escalation Quality Agent](https://github.com/Yufereva/ai-escalation-quality-agent)
+- [AI Knowledge Gap Agent](https://github.com/Yufereva/ai-knowledge-gap-agent)
+- [Support Ops AI Agent Portfolio](https://github.com/Yufereva/support-ops-ai-agent-portfolio)
+
 ## Future AI Agents
 
-This standalone repository focuses only on Trend Detection. Related Support Operations agents may be built later as independent projects:
+This repository focuses only on Trend Detection. Additional Support Operations
+concepts are documented in [docs/future-agents.md](docs/future-agents.md):
 
-- Knowledge Gap Agent (`knowledge-gap-agent/`) — recurring questions the knowledge base does not answer
-- Escalation Quality Agent (`escalation-quality-agent/`) — checklist score before Create in Jira
 - Log Analysis Agent
 - Repro Agent
 - Incident Copilot
