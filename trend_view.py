@@ -812,7 +812,7 @@ def render_trend_dashboard(ticket_id: str | None = None):
     )
     with confirm_col:
         confirmed_now = st.button(
-            "Confirm trend and update Jira draft",
+            "Confirm trend and create Jira ticket",
             type="primary",
             disabled=not reviewed_trend["is_potential_trend"],
             use_container_width=False,
@@ -859,6 +859,10 @@ def render_trend_dashboard(ticket_id: str | None = None):
             }
         )
         st.session_state[api_key] = api_analysis
+
+        # Jump straight into the Jira Create-issue draft with the just-confirmed data.
+        st.session_state["_create_jira_requested"] = ticket_id
+        st.session_state["_jira_create_return"] = {"mode": "trend", "ticket": ticket_id}
         st.rerun()
 
     with status_col:

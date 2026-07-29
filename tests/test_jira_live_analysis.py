@@ -127,12 +127,97 @@ def test_create_jira_issue_writes_runtime_once(monkeypatch):
         assert created["key"] == "ENG-151"
         assert created["trigger_ticket_id"] == "T-20168"
         assert created["arr_at_risk"] == "$484K"
+        assert created["type"] == "Bug"
         assert repeated["key"] == created["key"]
         assert updated["key"] == created["key"]
         assert updated["summary"] == "[Trend] Reviewed Identity cluster"
         assert updated["zendesk_ticket_count"] == 7
         assert updated["arr_at_risk"] == "$374K"
         assert len(stored) == 2
+    finally:
+        seed_path.unlink(missing_ok=True)
+        runtime_path.unlink(missing_ok=True)
+
+
+def test_apply_create_form_edits_updates_draft_fields():
+    draft = {
+        "title": "[Trend] Original",
+        "summary": "Original description",
+        "priority": "medium",
+        "category": "identity",
+        "similar_count": 4,
+        "similar_ticket_ids": ["T-1", "T-2"],
+        "customer_impact": {
+            "total_tickets": 5,
+            "arr_at_risk_formatted": "$100K",
+        },
+    }
+
+    edited = jira_view.apply_create_form_edits(
+        draft,
+        summary="Edited summary",
+        description="Edited description",
+        priority="High",
+        issue_type="Task",
+        category="api",
+        labels="trend-warning, api",
+        arr_at_risk="$250K",
+        zendesk_ticket_count=8,
+    )
+
+    assert edited["title"] == "Edited summary"
+    assert edited["summary"] == "Edited description"
+    assert edited["priority"] == "high"
+    assert edited["issue_type"] == "Task"
+    assert edited["category"] == "api"
+    assert edited["labels"] == "trend-warning, api"
+    assert edited["customer_impact"]["arr_at_risk_formatted"] == "$250K"
+    assert edited["customer_impact"]["total_tickets"] == 8
+    assert edited["similar_ticket_ids"] == ["T-1", "T-2"]
+
+
+def test_create_jira_issue_uses_form_type_and_labels(monkeypatch):
+    seed_path = jira_view.ROOT / "data" / "runtime" / "test-jira-form-seed.json"
+    runtime_path = jira_view.ROOT / "data" / "runtime" / "test-jira-form-created.json"
+    seed_path.parent.mkdir(parents=True, exist_ok=True)
+    seed_path.write_text(json.dumps({"issues": []}), encoding="utf-8")
+    runtime_path.unlink(missing_ok=True)
+    monkeypatch.setattr(jira_view, "JIRA_SEED_PATH", seed_path)
+    monkeypatch.setattr(jira_view, "JIRA_ISSUES_PATH", runtime_path)
+
+    draft = jira_view.apply_create_form_edits(
+        {
+            "title": "Base",
+            "summary": "Base desc",
+            "priority": "low",
+            "category": "billing",
+            "similar_count": 3,
+            "customer_impact": {"total_tickets": 4, "arr_at_risk_formatted": "$40K"},
+        },
+        summary="Form title",
+        description="Form description",
+        priority="Urgent",
+        issue_type="Task",
+        category="billing",
+        labels="trend-warning, support-escalation, billing",
+        arr_at_risk="$55K",
+        zendesk_ticket_count=4,
+    )
+
+    try:
+        created = jira_view.create_jira_issue("T-20179", draft)
+        assert created["key"] == "ENG-101"
+        assert created["type"] == "Task"
+        assert created["priority"] == "Urgent"
+        assert created["summary"] == "Form title"
+        assert created["description"] == "Form description"
+        assert created["labels"] == [
+            "trend-warning",
+            "support-escalation",
+            "billing",
+        ]
+        assert created["arr_at_risk"] == "$55K"
+        assert created["trigger_ticket_id"] == "T-20179"
     finally:
         seed_path.unlink(missing_ok=True)
         runtime_path.unlink(missing_ok=True)

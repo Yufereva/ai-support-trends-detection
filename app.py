@@ -23,7 +23,6 @@ from similarity import (
 from impact import calculate_customer_impact, format_arr, load_accounts
 from jira_view import (
     JIRA_CSS,
-    create_jira_issue,
     jira_view_in_jira_link,
     render_jira_view,
 )
@@ -1726,11 +1725,26 @@ def sync_query_params():
             st.session_state["_analyze_requested"] = ticket
         st.query_params.pop("analyze", None)
     create_jira = _qp_value(qp, "create_jira")
+    create = _qp_value(qp, "create")
     if create_jira == "1":
         ticket = _qp_value(qp, "ticket") or st.session_state.get("selected_ticket_id")
         if ticket:
             st.session_state["_create_jira_requested"] = ticket
+            return_mode = mode if mode in ("detail", "trend") else "detail"
+            st.session_state["_jira_create_return"] = {
+                "mode": return_mode,
+                "ticket": ticket,
+            }
         st.query_params.pop("create_jira", None)
+    elif create == "1":
+        ticket = _qp_value(qp, "ticket") or st.session_state.get("selected_ticket_id")
+        if ticket and "_jira_create_draft" not in st.session_state:
+            st.session_state["_create_jira_requested"] = ticket
+            if "_jira_create_return" not in st.session_state:
+                st.session_state["_jira_create_return"] = {
+                    "mode": "detail",
+                    "ticket": ticket,
+                }
 
 
 def set_query_params(**kwargs):
@@ -2487,8 +2501,20 @@ def ensure_detail_analysis(ticket_id: str) -> dict:
 
 
 def handle_jira_create_request() -> None:
+    """Open the Jira Create issue draft screen; do not persist until Create."""
     ticket_id = st.session_state.pop("_create_jira_requested", None)
+    create_open = _qp_value(st.query_params, "create") == "1"
+    if not ticket_id and create_open and "_jira_create_draft" not in st.session_state:
+        ticket_id = st.session_state.get("_jira_create_ticket") or st.session_state.get(
+            "selected_ticket_id"
+        )
     if not ticket_id:
+        return
+    if (
+        create_open
+        and st.session_state.get("_jira_create_draft")
+        and st.session_state.get("_jira_create_ticket") == ticket_id
+    ):
         return
 
     api_key = f"api_results_{ticket_id}"
@@ -2506,13 +2532,15 @@ def handle_jira_create_request() -> None:
         )
         return
 
-    issue = create_jira_issue(ticket_id, draft)
-    st.session_state.jira_issue = issue["key"]
+    st.session_state["_jira_create_ticket"] = ticket_id
+    st.session_state["_jira_create_draft"] = draft
     st.session_state.page_mode = "jira"
+    st.session_state.pop("jira_issue", None)
     set_query_params(
         mode="jira",
-        issue=issue["key"],
-        ticket=None,
+        create="1",
+        ticket=ticket_id,
+        issue=None,
         create_jira=None,
     )
     st.rerun()
@@ -2748,6 +2776,10 @@ def main():
     sync_query_params()
     handle_jira_create_request()
 
+    create_error = st.session_state.pop("_jira_create_error", None)
+    if create_error:
+        st.error(create_error)
+
     category_counts = get_category_counts()
     total_all = get_total_ticket_count()
     unsolved_count = get_unsolved_count()
@@ -2766,7 +2798,14 @@ def main():
     jira_nav = st.session_state.get("jira_nav", "backlog")
 
     if is_jira:
-        body_class = "jira-detail-mode" if jira_issue else "jira-mode"
+        create_open = _qp_value(st.query_params, "create") == "1"
+        create_draft_ready = st.session_state.get("_jira_create_draft") is not None
+        if create_open and create_draft_ready:
+            body_class = "jira-create-mode"
+        elif jira_issue and not create_open:
+            body_class = "jira-detail-mode"
+        else:
+            body_class = "jira-mode"
     elif is_trend:
         body_class = "trend-mode"
     else:
@@ -2785,12 +2824,19 @@ def main():
 
     if is_jira:
         install_query_param_navigation()
+        create_draft = st.session_state.get("_jira_create_draft")
+        create_ticket = st.session_state.get("_jira_create_ticket")
+        show_create = (
+            _qp_value(st.query_params, "create") == "1" and create_draft is not None
+        )
         render_jira_view(
-            issue_key=jira_issue,
+            issue_key=None if show_create else jira_issue,
             status_filter=jira_filter,
             search=jira_search,
             page=jira_page,
             nav=jira_nav,
+            create_draft=create_draft if show_create else None,
+            create_ticket_id=create_ticket if show_create else None,
         )
         return
 

@@ -62,24 +62,50 @@ SVG_CHEVRON_RIGHT = (
     "</svg>"
 )
 
+JIRA_CREATE_TOOLBAR_HTML = (
+    '<div class="jira-create-toolbar">'
+    f'<span>Normal text {SVG_CHEVRON}</span>'
+    '<span class="jira-toolbar-divider"></span>'
+    '<span class="jira-toolbar-bold">B</span>'
+    '<span class="jira-toolbar-italic">I</span>'
+    '<span class="jira-toolbar-underline">U</span>'
+    '<span class="jira-toolbar-divider"></span>'
+    "<span>\U0001F517</span>"
+    "<span>\U0001F5BC</span>"
+    "<span>&lt;/&gt;</span>"
+    '<span class="jira-toolbar-divider"></span>'
+    "<span>\u2261</span>"
+    "<span>\u2630</span>"
+    "<span>\u22ef</span>"
+    "</div>"
+)
+
+JIRA_CREATE_DROPZONE_HTML = (
+    '<div class="jira-create-dropzone">'
+    "\U0001F4CE Drop files to attach, or "
+    '<span class="jira-create-dropzone-link">browse</span>'
+    "</div>"
+)
+
 JIRA_CSS = """
 <style>
-    body.jira-mode [data-testid="stAppViewContainer"],
+    /* Backlog/detail sidebar layout — must NOT apply in create mode (create uses st.columns too). */
+    body.jira-mode:not(.jira-create-mode) [data-testid="stAppViewContainer"],
     body.jira-detail-mode [data-testid="stAppViewContainer"] { background: #F4F5F7; }
-    body.jira-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)),
+    body.jira-mode:not(.jira-create-mode) [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)),
     body.jira-detail-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) {
         flex-wrap: nowrap !important; width: 100% !important;
     }
-    body.jira-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="column"]:nth-child(1),
-    body.jira-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="stColumn"]:nth-child(1),
+    body.jira-mode:not(.jira-create-mode) [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="column"]:nth-child(1),
+    body.jira-mode:not(.jira-create-mode) [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="stColumn"]:nth-child(1),
     body.jira-detail-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="column"]:nth-child(1),
     body.jira-detail-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="stColumn"]:nth-child(1) {
         flex: 0 0 240px !important; width: 240px !important; min-width: 240px !important;
         max-width: 240px !important; background: #F4F5F7; border-right: 1px solid #DFE1E6;
         min-height: calc(100vh - 56px);
     }
-    body.jira-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="column"]:nth-child(2),
-    body.jira-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="stColumn"]:nth-child(2),
+    body.jira-mode:not(.jira-create-mode) [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="column"]:nth-child(2),
+    body.jira-mode:not(.jira-create-mode) [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="stColumn"]:nth-child(2),
     body.jira-detail-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="column"]:nth-child(2),
     body.jira-detail-mode [data-testid="stHorizontalBlock"]:not(:has(.st-key-jira_search)) > [data-testid="stColumn"]:nth-child(2) {
         flex: 1 1 0% !important; min-width: 0 !important;
@@ -116,6 +142,7 @@ JIRA_CSS = """
     .jira-create-btn {
         background: #0065FF; color: #fff; border: none; border-radius: 3px;
         padding: 6px 12px; font-size: 14px; font-weight: 500; cursor: default;
+        text-decoration: none; display: inline-block;
     }
     .jira-back-link {
         color: rgba(255,255,255,0.9); font-size: 13px; text-decoration: none;
@@ -367,6 +394,156 @@ JIRA_CSS = """
     .jira-priority-medium { color: #FF991F; }
     .jira-priority-low { color: #6B778C; }
     .jira-type { display: flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 13px; }
+
+    /* ===== Create issue modal (scoped under body.jira-create-mode) ===== */
+    body.jira-create-mode [data-testid="stAppViewContainer"] {
+        background: #F4F5F7 !important;
+        overflow-y: auto !important;
+    }
+    body.jira-mode:not(.jira-create-mode) [data-testid="stAppViewContainer"],
+    body.jira-detail-mode [data-testid="stAppViewContainer"] {
+        overflow-y: auto !important;
+    }
+    /* Project chrome (Escalation from support) stays visible under the modal */
+    body.jira-create-mode [data-testid="stElementContainer"]:has(.jira-create-page),
+    body.jira-create-mode [data-testid="element-container"]:has(.jira-create-page) {
+        position: fixed !important;
+        top: 56px; left: 0; right: 0; bottom: 0;
+        z-index: 1; margin: 0 !important; padding: 0 !important;
+        overflow: hidden !important; pointer-events: none;
+    }
+    body.jira-create-mode .jira-create-page {
+        position: relative; height: 100%; display: flex; align-items: stretch;
+        background: #F4F5F7;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    body.jira-create-mode .jira-create-page .jira-sidebar {
+        flex: 0 0 240px; width: 240px; background: #F4F5F7;
+        border-right: 1px solid #DFE1E6; overflow: hidden;
+    }
+    body.jira-create-mode .jira-create-page .jira-main {
+        flex: 1 1 auto; min-width: 0; background: #fff; overflow: hidden;
+    }
+    body.jira-create-mode .jira-create-dim {
+        position: absolute; inset: 0;
+        background: rgba(9, 30, 66, 0.54);
+        z-index: 2;
+    }
+    body.jira-create-mode [data-testid="stElementContainer"]:has(.jira-create-shell),
+    body.jira-create-mode [data-testid="element-container"]:has(.jira-create-shell),
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) {
+        position: relative; z-index: 10;
+    }
+    body.jira-create-mode .jira-create-shell {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        background: transparent;
+        padding: 32px 16px 0;
+        margin: 0;
+    }
+    body.jira-create-mode .jira-create-dialog {
+        max-width: 720px; margin: 0 auto; background: #fff;
+        border: 1px solid #DFE1E6; border-bottom: none;
+        border-radius: 3px 3px 0 0;
+        box-shadow: 0 8px 16px rgba(9, 30, 66, 0.25);
+        padding: 20px 24px 8px;
+    }
+    body.jira-create-mode .jira-create-dialog h1 {
+        font-size: 20px; font-weight: 500; color: #172B4D; margin: 0;
+    }
+    body.jira-create-mode .jira-create-sub {
+        font-size: 12px; color: #6B778C; margin: 6px 0 16px;
+    }
+    body.jira-create-mode .jira-create-field { margin-bottom: 12px; }
+    body.jira-create-mode .jira-create-field-label {
+        display: block; font-size: 12px; font-weight: 600; color: #6B778C;
+        margin-bottom: 4px; line-height: 1.3;
+    }
+    body.jira-create-mode .jira-create-field-label .req { color: #DE350B; margin-left: 2px; }
+    body.jira-create-mode .jira-create-locked {
+        display: flex; align-items: center; gap: 8px;
+        border: 1px solid #DFE1E6; border-radius: 3px; background: #FAFBFC;
+        padding: 8px 10px; font-size: 14px; color: #172B4D; min-height: 40px;
+    }
+    body.jira-create-mode .jira-create-locked .jira-project-icon {
+        width: 24px; height: 24px; font-size: 10px;
+    }
+    body.jira-create-mode .jira-create-locked-meta {
+        font-size: 12px; color: #6B778C; margin-left: 4px;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) {
+        max-width: 720px; margin: 0 auto 48px; padding: 8px 24px 16px;
+        background: #fff; border: 1px solid #DFE1E6; border-top: none;
+        border-radius: 0 0 3px 3px; box-shadow: 0 8px 16px rgba(9, 30, 66, 0.25);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) [data-testid="stWidgetLabel"] p,
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) label p {
+        font-size: 12px !important; font-weight: 600 !important;
+        color: #6B778C !important;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) [data-baseweb="input"] > div,
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) [data-baseweb="textarea"] > div,
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) [data-baseweb="select"] > div {
+        border-color: #DFE1E6 !important; border-radius: 3px !important;
+        background: #FAFBFC !important;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) [data-baseweb="input"] input,
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) [data-baseweb="textarea"] textarea {
+        color: #172B4D !important; font-size: 14px !important;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) [data-testid="stCaption"] {
+        color: #6B778C !important; font-size: 12px !important;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) button[kind="primary"],
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) button[data-testid="baseButton-primary"],
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) button[data-testid="stBaseButton-primary"] {
+        background-color: #0052CC !important; border-color: #0052CC !important;
+        color: #fff !important; border-radius: 3px !important; font-weight: 500 !important;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) button[kind="secondary"],
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) button[data-testid="baseButton-secondary"],
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) button[data-testid="stBaseButton-secondary"] {
+        background: #fff !important; border: 1px solid #DFE1E6 !important;
+        color: #42526E !important; border-radius: 3px !important;
+    }
+
+    /* Create-issue dialog chrome: header row, rich-text toolbar, dropzone, assignee (visual fidelity only). */
+    body.jira-create-mode .jira-create-header-row {
+        display: flex; justify-content: flex-end; align-items: center; gap: 14px;
+        margin-bottom: 2px;
+    }
+    body.jira-create-mode .jira-create-header-link { font-size: 13px; color: #0052CC; cursor: default; }
+    body.jira-create-mode .jira-create-header-kebab,
+    body.jira-create-mode .jira-create-header-close { font-size: 16px; color: #6B778C; cursor: default; line-height: 1; }
+    body.jira-create-mode .jira-create-header-close { font-size: 20px; }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-create-toolbar {
+        display: flex; align-items: center; gap: 10px; margin-top: 4px;
+        border: 1px solid #DFE1E6; border-bottom: none; border-radius: 3px 3px 0 0;
+        background: #FAFBFC; padding: 6px 10px; font-size: 13px; color: #42526E;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-toolbar-divider {
+        width: 1px; height: 16px; background: #DFE1E6;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-toolbar-bold { font-weight: 700; }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-toolbar-italic { font-style: italic; }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-toolbar-underline { text-decoration: underline; }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary)
+        [data-testid="stElementContainer"]:has(.jira-create-toolbar) + [data-testid="stElementContainer"] [data-baseweb="textarea"] > div {
+        border-top: none !important; border-radius: 0 0 3px 3px !important;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-create-dropzone {
+        border: 2px dashed #DFE1E6; border-radius: 3px; background: #FAFBFC;
+        padding: 20px 12px; text-align: center; font-size: 13px; color: #6B778C; margin: 4px 0 8px;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-create-dropzone-link {
+        color: #0052CC; cursor: default;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-create-assign-to-me {
+        font-size: 13px; color: #0052CC; cursor: default; padding-top: 30px;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-create-avatar-slot {
+        padding-top: 28px;
+    }
 </style>
 """
 
@@ -420,27 +597,87 @@ def _write_jira_issues(issues: list[dict]) -> None:
     temporary.replace(JIRA_ISSUES_PATH)
 
 
+def _normalize_labels(draft: dict, category: str) -> list[str]:
+    labels = draft.get("labels")
+    if labels is None:
+        return ["trend-warning", "support-escalation", category]
+    if isinstance(labels, str):
+        return [part.strip() for part in labels.split(",") if part.strip()]
+    return [str(part).strip() for part in labels if str(part).strip()]
+
+
 def _draft_issue_fields(ticket_id: str, draft: dict) -> dict:
     impact = draft.get("customer_impact") or {}
     category = draft.get("category", "support")
+    arr = draft.get("arr_at_risk") or impact.get("arr_at_risk_formatted", "$0")
+    ticket_count = draft.get("zendesk_ticket_count")
+    if ticket_count is None:
+        ticket_count = impact.get("total_tickets", 0)
     return {
         "priority": str(draft.get("priority", "medium")).title(),
         "summary": draft.get("title", "Support trend investigation"),
         "description": draft.get("summary", "Support trend detected."),
-        "labels": ["trend-warning", "support-escalation", category],
+        "labels": _normalize_labels(draft, category),
         "trigger_ticket_id": ticket_id,
         "similar_ticket_count": draft.get("similar_count", 0),
-        "zendesk_ticket_count": impact.get("total_tickets", 0),
-        "arr_at_risk": impact.get("arr_at_risk_formatted", "$0"),
+        "zendesk_ticket_count": ticket_count,
+        "arr_at_risk": arr,
+        "assignee": draft.get("assignee") or "Unassigned",
     }
+
+
+def _issue_type_from_draft(draft: dict) -> str:
+    issue_type = draft.get("issue_type") or draft.get("type") or "Bug"
+    return issue_type if issue_type in TYPE_ICONS else "Bug"
+
+
+def apply_create_form_edits(
+    draft: dict,
+    *,
+    summary: str,
+    description: str,
+    priority: str,
+    issue_type: str,
+    category: str,
+    labels: str | list[str],
+    arr_at_risk: str | None = None,
+    zendesk_ticket_count: int | None = None,
+    assignee: str | None = None,
+) -> dict:
+    """Merge editable Create-issue form values into an engineering draft."""
+    updated = dict(draft)
+    impact = dict(updated.get("customer_impact") or {})
+    if arr_at_risk is not None:
+        impact["arr_at_risk_formatted"] = arr_at_risk
+        updated["arr_at_risk"] = arr_at_risk
+    if zendesk_ticket_count is not None:
+        impact["total_tickets"] = zendesk_ticket_count
+        updated["zendesk_ticket_count"] = zendesk_ticket_count
+    if assignee is not None:
+        updated["assignee"] = assignee.strip() or "Unassigned"
+    updated.update(
+        {
+            "title": summary.strip() or "Support trend investigation",
+            "summary": description,
+            "priority": priority.lower(),
+            "issue_type": issue_type,
+            "category": category.strip() or updated.get("category", "support"),
+            "labels": labels,
+            "customer_impact": impact,
+        }
+    )
+    return updated
 
 
 def create_jira_issue(ticket_id: str, draft: dict) -> dict:
     """Create or update one local Jira demo issue per trigger ticket."""
     issues = load_jira_issues()
+    fields = _draft_issue_fields(ticket_id, draft)
+    issue_type = _issue_type_from_draft(draft)
     existing = issue_for_trigger_ticket(issues, ticket_id)
     if existing:
-        existing.update(_draft_issue_fields(ticket_id, draft))
+        existing.update(fields)
+        existing["type"] = issue_type
         _write_jira_issues(issues)
         return existing
 
@@ -452,12 +689,11 @@ def create_jira_issue(ticket_id: str, draft: dict) -> dict:
     ]
     issue = {
         "key": f"{PROJECT_KEY}-{max(issue_numbers, default=100) + 1}",
-        "type": "Bug",
+        "type": issue_type,
         "status": "Open",
-        "assignee": "Unassigned",
         "reporter": "Support Operations",
         "created": date.today().isoformat(),
-        **_draft_issue_fields(ticket_id, draft),
+        **fields,
     }
     issues.append(issue)
     _write_jira_issues(issues)
@@ -719,8 +955,12 @@ def _issue_row_html(
     )
 
 
-def render_jira_topbar():
-    st.markdown(
+def render_jira_topbar(*, show_create: bool = True):
+    create_btn = (
+        '<span class="jira-create-btn">Create</span>' if show_create else ""
+    )
+    # Use st.html — st.markdown escapes leftover </div> as a visible code block.
+    st.html(
         f"""
         <div class="jira-topbar">
             <div class="jira-topbar-logo">{SVG_JIRA_LOGO} Jira</div>
@@ -736,15 +976,14 @@ def render_jira_topbar():
             <div class="jira-topbar-search">{SVG_SEARCH} Search</div>
             <div class="jira-topbar-actions">
                 <a class="jira-back-link" href="?mode=list">← Zendesk</a>
-                <span class="jira-create-btn">Create</span>
+                {create_btn}
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 
-def render_jira_sidebar(nav: str, status_filter: str):
+def _jira_sidebar_html(nav: str, status_filter: str) -> str:
     nav_links = []
     for key, icon, label, href in [
         ("roadmap", "🗺", "Roadmap", _jira_url(nav="backlog")),
@@ -761,25 +1000,22 @@ def render_jira_sidebar(nav: str, status_filter: str):
             f'<span class="jira-nav-icon">{icon}</span>{html.escape(label)}</a>'
         )
 
-    filter_items = []
+    filter_section = ""
     if nav == "issues":
+        filter_items = []
         for key, label in STATUS_FILTERS:
             active = " active" if status_filter == key else ""
             href = _jira_url(nav="issues", status_filter=key)
             filter_items.append(
                 f'<a class="jira-filter-item{active}" href="{href}">{html.escape(label)}</a>'
             )
-
-    filter_section = ""
-    if filter_items:
         filter_section = (
             '<div class="jira-sidebar-divider"></div>'
             '<div class="jira-sidebar-section">Status</div>'
             + "".join(filter_items)
         )
 
-    st.markdown(
-        f"""
+    return f"""
         <div class="jira-sidebar">
             <div class="jira-project-header">
                 <a class="jira-project-header-link" href="{_jira_url(nav="backlog")}">
@@ -800,26 +1036,25 @@ def render_jira_sidebar(nav: str, status_filter: str):
             </a>
             {filter_section}
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        """
 
 
-def render_jira_backlog(
+def render_jira_sidebar(nav: str, status_filter: str):
+    st.markdown(_jira_sidebar_html(nav, status_filter), unsafe_allow_html=True)
+
+
+def _jira_backlog_html(
     issues: list[dict],
-    total_count: int,
     status_filter: str = "all",
     selected_key: str | None = None,
-):
+) -> str:
     sprint_issues = issues[:SPRINT_SIZE]
     backlog_count = max(0, len(issues) - SPRINT_SIZE)
     sprint_rows = "".join(
         _issue_row_html(i, selected_key, nav="backlog", status_filter=status_filter)
         for i in sprint_issues
     )
-
-    st.markdown(
-        f"""
+    return f"""
         <div class="jira-main">
             <div class="jira-board-header">
                 <h1 class="jira-board-title">Backlog</h1>
@@ -847,8 +1082,37 @@ def render_jira_backlog(
                 </div>
             </div>
         </div>
-        """,
+        """
+
+
+def render_jira_backlog(
+    issues: list[dict],
+    total_count: int,
+    status_filter: str = "all",
+    selected_key: str | None = None,
+):
+    _ = total_count
+    st.markdown(
+        _jira_backlog_html(issues, status_filter=status_filter, selected_key=selected_key),
         unsafe_allow_html=True,
+    )
+
+
+def render_jira_create_background(
+    issues: list[dict],
+    *,
+    nav: str = "backlog",
+    status_filter: str = "all",
+):
+    """Decorative Escalation-from-support chrome under the Create issue modal."""
+    st.html(
+        f"""
+        <div class="jira-create-page">
+            {_jira_sidebar_html(nav, status_filter)}
+            {_jira_backlog_html(issues, status_filter=status_filter)}
+            <div class="jira-create-dim" aria-hidden="true"></div>
+        </div>
+        """
     )
 
 
@@ -901,6 +1165,201 @@ def render_jira_issues_list(
         """,
         unsafe_allow_html=True,
     )
+
+
+def render_jira_create_form(ticket_id: str, draft: dict):
+    """Editable Jira Create issue dialog. Persists only when Create is clicked."""
+    impact = draft.get("customer_impact") or {}
+    category = draft.get("category", "support")
+    default_labels = ", ".join(_normalize_labels(draft, category))
+    priority_options = ["Low", "Medium", "High", "Urgent"]
+    priority_default = str(draft.get("priority", "medium")).title()
+    if priority_default not in priority_options:
+        priority_default = "Medium"
+    issue_type_default = _issue_type_from_draft(draft)
+    type_options = ["Bug", "Task"]
+    if issue_type_default not in type_options:
+        issue_type_default = "Bug"
+    similar_ids = draft.get("similar_ticket_ids") or []
+    linked_count = impact.get("total_tickets") or (len(similar_ids) + 1)
+    arr_default = impact.get("arr_at_risk_formatted", "$0")
+    linked_preview = ", ".join(similar_ids[:12]) + ("…" if len(similar_ids) > 12 else "")
+
+    st.markdown(
+        f"""
+        <div class="jira-create-shell">
+            <div class="jira-create-dialog">
+                <div class="jira-create-header-row">
+                    <span class="jira-create-header-link">Import issues</span>
+                    <span class="jira-create-header-kebab">&#8942;</span>
+                    <span class="jira-create-header-close">&times;</span>
+                </div>
+                <h1>Create issue</h1>
+                <p class="jira-create-sub">
+                    Pre-filled from Trend Detection · trigger {html.escape(ticket_id)}
+                    · {linked_count} linked Zendesk · {draft.get("similar_count", 0)} similar
+                </p>
+                <div class="jira-create-field">
+                    <span class="jira-create-field-label">Project</span>
+                    <div class="jira-create-locked">
+                        <span class="jira-project-icon">{PROJECT_KEY}</span>
+                        <span>{html.escape(PROJECT_NAME)}</span>
+                        <span class="jira-create-locked-meta">({PROJECT_KEY})</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    submitted = False
+    cancelled = False
+    with st.form("jira_create_issue_form", clear_on_submit=False, border=False):
+        col_type, col_priority = st.columns(2)
+        with col_type:
+            issue_type = st.selectbox(
+                "Issue Type",
+                type_options,
+                index=type_options.index(issue_type_default),
+                key="jira_create_issue_type",
+            )
+        with col_priority:
+            priority = st.selectbox(
+                "Priority",
+                priority_options,
+                index=priority_options.index(priority_default),
+                key="jira_create_priority",
+            )
+
+        summary = st.text_input(
+            "Summary *",
+            value=draft.get("title", ""),
+            key="jira_create_summary",
+        )
+
+        assignee_default = draft.get("assignee") or "Unassigned"
+        col_avatar, col_assignee, col_assign_link = st.columns([0.4, 3.6, 1])
+        with col_avatar:
+            st.markdown(
+                f'<div class="jira-create-avatar-slot">{_avatar_html(assignee_default)}</div>',
+                unsafe_allow_html=True,
+            )
+        with col_assignee:
+            assignee_value = st.text_input(
+                "Assignee",
+                value=assignee_default,
+                key="jira_create_assignee",
+            )
+        with col_assign_link:
+            st.markdown(
+                '<div class="jira-create-assign-to-me">Assign to me</div>',
+                unsafe_allow_html=True,
+            )
+
+        st.markdown(
+            '<span class="jira-create-field-label">Description</span>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(JIRA_CREATE_TOOLBAR_HTML, unsafe_allow_html=True)
+        description = st.text_area(
+            "Description",
+            value=draft.get("summary", ""),
+            height=140,
+            key="jira_create_description",
+            label_visibility="collapsed",
+        )
+        st.markdown(JIRA_CREATE_DROPZONE_HTML, unsafe_allow_html=True)
+
+        col_labels, col_cat = st.columns(2)
+        with col_labels:
+            labels_value = st.text_input(
+                "Labels",
+                value=default_labels,
+                key="jira_create_labels",
+            )
+        with col_cat:
+            category_value = st.text_input(
+                "Category",
+                value=category,
+                key="jira_create_category",
+            )
+        arr_value = st.text_input(
+            "ARR at risk",
+            value=arr_default,
+            key="jira_create_arr",
+        )
+        if linked_preview:
+            st.caption(f"Linked similar tickets: {linked_preview}")
+
+        bottom_cols = st.columns([1.8, 3.4, 1.2, 1.5])
+        with bottom_cols[0]:
+            st.checkbox("Create another issue", key="jira_create_another")
+        with bottom_cols[2]:
+            cancelled = st.form_submit_button(
+                "Cancel",
+                use_container_width=True,
+            )
+        with bottom_cols[3]:
+            submitted = st.form_submit_button(
+                "Create",
+                type="primary",
+                use_container_width=True,
+            )
+
+    if cancelled:
+        _cancel_jira_create(ticket_id)
+        return
+
+    if submitted:
+        edited = apply_create_form_edits(
+            draft,
+            summary=summary,
+            description=description,
+            priority=priority,
+            issue_type=issue_type,
+            category=category_value,
+            labels=labels_value,
+            arr_at_risk=arr_value,
+            zendesk_ticket_count=linked_count,
+            assignee=assignee_value,
+        )
+        issue = create_jira_issue(ticket_id, edited)
+        _finish_jira_create(issue)
+        return
+
+
+def _clear_jira_create_session() -> None:
+    for key in (
+        "_jira_create_draft",
+        "_jira_create_ticket",
+        "_jira_create_return",
+        "_create_jira_requested",
+    ):
+        st.session_state.pop(key, None)
+
+
+def _cancel_jira_create(ticket_id: str) -> None:
+    """Close Create issue and stay on the Jira backlog (not Zendesk)."""
+    _ = ticket_id
+    _clear_jira_create_session()
+    st.session_state.page_mode = "jira"
+    st.session_state.pop("jira_issue", None)
+    st.session_state.jira_nav = "backlog"
+    st.query_params.clear()
+    st.query_params["mode"] = "jira"
+    st.query_params["nav"] = "backlog"
+    st.rerun()
+
+
+def _finish_jira_create(issue: dict) -> None:
+    _clear_jira_create_session()
+    st.session_state.jira_issue = issue["key"]
+    st.session_state.page_mode = "jira"
+    st.query_params.clear()
+    st.query_params["mode"] = "jira"
+    st.query_params["issue"] = issue["key"]
+    st.rerun()
 
 
 def render_jira_issue_detail(issue: dict, nav: str = "backlog", status_filter: str = "all"):
@@ -1052,14 +1511,31 @@ def render_jira_view(
     search: str = "",
     page: int = 0,
     nav: str = "backlog",
+    create_draft: dict | None = None,
+    create_ticket_id: str | None = None,
 ):
+    # Create draft must not sit inside the backlog columns — those use a
+    # viewport-sized layout that hid the Streamlit form under the HTML stub.
+    # Instead: paint Escalation-from-support chrome as a fixed backdrop, then
+    # overlay the Streamlit form on top.
+    show_create = create_draft is not None and create_ticket_id
+    render_jira_topbar(show_create=not show_create)
+
     issues = hydrate_linked_issues(load_jira_issues())
     total_count = len(issues)
     filtered = _filter_issues(issues, status_filter, search)
+
+    if show_create:
+        render_jira_create_background(
+            filtered,
+            nav=nav if nav in ("backlog", "issues") else "backlog",
+            status_filter=status_filter,
+        )
+        render_jira_create_form(create_ticket_id, create_draft)
+        return
+
     is_detail = issue_key is not None
     issue = issue_by_key(issues, issue_key) if is_detail else None
-
-    render_jira_topbar()
 
     col_sidebar, col_main = st.columns([0.18, 0.82])
     with col_sidebar:
