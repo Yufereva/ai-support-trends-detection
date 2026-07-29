@@ -210,7 +210,8 @@ The application drafts evidence; it does not autonomously declare incidents, set
 
 This standalone repository focuses only on Trend Detection. Related Support Operations agents may be built later as independent projects:
 
-- Knowledge Gap Agent
+- Knowledge Gap Agent (`knowledge-gap-agent/`) — recurring questions the knowledge base does not answer
+- Escalation Quality Agent (`escalation-quality-agent/`) — checklist score before Create in Jira
 - Log Analysis Agent
 - Repro Agent
 - Incident Copilot

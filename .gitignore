@@ -40,7 +40,8 @@ WORKLOG.md
 PLATFORM_SPEC.md
 
 # Generated application state (recreated from data/synthetic/full_dataset.json)
-data/runtime/
+# Unanchored so per-agent runtime state (e.g. knowledge-gap-agent) is covered too.
+**/data/runtime/
 embeddings_cache.npz
 
 # Local database runtime files
