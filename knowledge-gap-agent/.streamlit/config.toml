@@ -1,6 +1,0 @@
-[client]
-# Hide developer chrome locally so C / Ctrl+C no longer opens Clear caches.
-toolbarMode = "viewer"
-
-[browser]
-gatherUsageStats = false
