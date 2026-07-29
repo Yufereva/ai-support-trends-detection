@@ -338,7 +338,7 @@ def _customer_questions(tickets: list[dict]) -> list[str]:
         if len(body) > 140:
             body = body[:137] + "..."
         link = f"[`{ticket['id']}`]({ZENDESK_BASE_URL}/?ticket={ticket['id']}&mode=detail)"
-        questions.append(f"{link} — **{subject}** — “{body}”")
+        questions.append(f"{link} **{subject}**: “{body}”")
     return questions
 
 
@@ -357,7 +357,7 @@ def draft_content_brief(theme: dict) -> str:
         )
         existing = (
             "No close match exists in the knowledge base today. "
-            "Do not bolt this onto an unrelated article — create a dedicated page."
+            "Do not bolt this onto an unrelated article. Create a dedicated page."
         )
         recommendation = (
             "Create a new article with the outline below, then link it from "
@@ -396,7 +396,7 @@ def draft_content_brief(theme: dict) -> str:
         f"{article_block}\n"
         f"## Proposed article outline\n{outline_md}\n\n"
         f"## Evidence & customer questions "
-        f"({theme['ticket_count']} tickets — click an ID to open in Zendesk)\n"
+        f"({theme['ticket_count']} tickets, click an ID to open in Zendesk)\n"
         f"{questions_md}\n\n"
         f"## Suggested next step\n{recommendation}\n\n"
         f"_Draft recommendation for a content owner. Publishing is an explicit "

@@ -1,0 +1,9 @@
+---
+description: Prohibit em dashes in all text and code
+alwaysApply: true
+---
+
+# Never Use Em Dashes
+
+Do not use the em dash character in UI copy, documentation, comments, code, or responses.
+Use a period, comma, colon, semicolon, or parentheses instead.

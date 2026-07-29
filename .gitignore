@@ -38,6 +38,7 @@ log-analysis/
 trend-detection/
 WORKLOG.md
 PLATFORM_SPEC.md
+verify_*.py
 
 # Generated application state (recreated from data/synthetic/full_dataset.json)
 # Unanchored so per-agent runtime state (e.g. knowledge-gap-agent) is covered too.

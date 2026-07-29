@@ -111,6 +111,13 @@ div[data-testid="stButton"] > button {
   padding: 6px 10px;
   font-size: 13px;
 }
+.st-key-published_toolbar,
+.st-key-published_editor {
+  max-width: 640px;
+}
+.st-key-published_toolbar {
+  margin-top: 18px;
+}
 
 /* Compact theme card header with a Notion-style status pill */
 .theme-head {
@@ -377,7 +384,7 @@ def render_article_draft(content: str) -> None:
         f"""
         <div class="doc-shell">
           <div class="doc-callout">
-            Review required — this AI draft may contain incorrect or
+            Review required. This AI draft may contain incorrect or
             incomplete product details.
           </div>
           <div class="doc-body">{markdown_to_html(content)}</div>
@@ -428,67 +435,31 @@ def render_published_article() -> None:
               All collections › {product_area} › Articles
             </div>
             <h1>{html.escape(published["label"])}</h1>
-            <div class="hc-meta">
-              Published {published_on} ·
-              Demo knowledge base stub — nothing is sent to a real help center.
-            </div>
+            <div class="hc-meta">Published {published_on}</div>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    edit_col, share_col, copy_col, history_col, unpub_col = st.columns(
-        [1, 1, 1.1, 1.1, 1.2]
-    )
-    with edit_col:
-        if st.button(
-            "Done" if editing else "Edit",
-            key=f"edit_btn_{theme_id}",
-            use_container_width=True,
-            type="primary" if editing else "secondary",
-        ):
-            st.session_state[edit_key] = not editing
-            st.rerun()
-    with share_col:
-        if st.button("Share", key=f"share_btn_{theme_id}", use_container_width=True):
-            st.toast("Share link copied (demo).", icon="🔗")
-    with copy_col:
-        if st.button(
-            "Copy page", key=f"copy_btn_{theme_id}", use_container_width=True
-        ):
-            st.toast("Page Markdown copied (demo).", icon="📋")
-    with history_col:
-        if st.button(
-            "History", key=f"history_btn_{theme_id}", use_container_width=True
-        ):
-            st.toast("Version history is a demo stub.", icon="🕘")
-    with unpub_col:
-        if st.button(
-            "Unpublish",
-            key=f"unpub_btn_{theme_id}",
-            use_container_width=True,
-        ):
-            unpublish_article(theme_id)
-            st.session_state.pop(edit_key, None)
-            st.query_params.clear()
-            st.rerun()
-
-    if editing:
-        edited = st.text_area(
-            "Article Markdown",
-            value=published["content"],
-            height=420,
-            key=f"editor_{theme_id}",
-            label_visibility="collapsed",
+    with st.container(key="published_toolbar"):
+        edit_col, publish_col, copy_col, history_col, unpub_col = st.columns(
+            [1, 1, 1.1, 1.1, 1.2]
         )
-        save_col, cancel_col, _ = st.columns([1, 1, 3])
-        with save_col:
+        with edit_col:
             if st.button(
-                "Save changes",
-                key=f"save_btn_{theme_id}",
+                "Done" if editing else "Edit",
+                key=f"edit_btn_{theme_id}",
                 use_container_width=True,
-                type="primary",
+                type="primary" if editing else "secondary",
+            ):
+                st.session_state[edit_key] = not editing
+                st.rerun()
+        with publish_col:
+            if st.button(
+                "Publish",
+                key=f"publish_page_btn_{theme_id}",
+                use_container_width=True,
             ):
                 publish_article(
                     theme_id,
@@ -496,18 +467,66 @@ def render_published_article() -> None:
                         "label": published["label"],
                         "product_area": published["product_area"],
                     },
-                    edited,
+                    published["content"],
                 )
-                st.session_state[edit_key] = False
+                st.toast("Published to the Help Center.")
                 st.rerun()
-        with cancel_col:
+        with copy_col:
             if st.button(
-                "Cancel",
-                key=f"cancel_btn_{theme_id}",
+                "Copy page", key=f"copy_btn_{theme_id}", use_container_width=True
+            ):
+                st.toast("Page Markdown copied (demo).", icon="📋")
+        with history_col:
+            if st.button(
+                "History", key=f"history_btn_{theme_id}", use_container_width=True
+            ):
+                st.toast("Version history is a demo stub.", icon="🕘")
+        with unpub_col:
+            if st.button(
+                "Unpublish",
+                key=f"unpub_btn_{theme_id}",
                 use_container_width=True,
             ):
-                st.session_state[edit_key] = False
+                unpublish_article(theme_id)
+                st.session_state.pop(edit_key, None)
+                st.query_params.clear()
                 st.rerun()
+
+    if editing:
+        with st.container(key="published_editor"):
+            edited = st.text_area(
+                "Article Markdown",
+                value=published["content"],
+                height=420,
+                key=f"editor_{theme_id}",
+                label_visibility="collapsed",
+            )
+            save_col, cancel_col, _ = st.columns([1, 1, 3])
+            with save_col:
+                if st.button(
+                    "Save changes",
+                    key=f"save_btn_{theme_id}",
+                    use_container_width=True,
+                    type="primary",
+                ):
+                    publish_article(
+                        theme_id,
+                        {
+                            "label": published["label"],
+                            "product_area": published["product_area"],
+                        },
+                        edited,
+                    )
+                    st.session_state[edit_key] = False
+                    st.rerun()
+            with cancel_col:
+                if st.button(
+                    "Cancel",
+                    key=f"cancel_btn_{theme_id}",
+                    use_container_width=True,
+                ):
+                    st.session_state[edit_key] = False
+                    st.rerun()
     else:
         st.markdown(
             f"""
@@ -546,8 +565,8 @@ def render_kb_article() -> None:
     flag_html = ""
     if theme_id:
         flag_html = (
-            f'<div class="kb-flag"><strong>Flagged for improvement</strong> — '
-            f"this article is the closest match for theme "
+            f'<div class="kb-flag"><strong>Flagged for improvement.</strong> '
+            f"This article is the closest match for theme "
             f"<code>{html.escape(theme_id)}</code>, but coverage is weak. "
             f"Use the content brief on the dashboard for the missing sections."
             f"</div>"
@@ -610,8 +629,8 @@ def render_dashboard() -> None:
     if changes:
         st.subheader("Needs attention this week")
         st.caption(
-            "Coverage shifts since last week. Each row has a recommended next step — "
-            "open the theme and act on it."
+            "Coverage shifts since last week. Each row has a recommended next step. "
+            "Open the theme and act on it."
         )
         for change in changes:
             css = f"change-{change['to_coverage']}"
@@ -687,7 +706,8 @@ def render_dashboard() -> None:
         elif article:
             article_line = (
                 f"Closest article: **{article['title']}** "
-                f"(similarity {theme['best_match_score']:.0%}) — still too weak to count as coverage"
+                f"(similarity {theme['best_match_score']:.0%}), "
+                f"still too weak to count as coverage"
             )
         else:
             article_line = "No matching article found."
@@ -734,7 +754,7 @@ def render_dashboard() -> None:
                 is_published = theme["theme_id"] in published
                 if is_published:
                     st.markdown(
-                        f"Published to the knowledge base — "
+                        f"Published to the knowledge base: "
                         f"[open article →]({published_article_url(theme['theme_id'])})"
                     )
 
@@ -751,9 +771,7 @@ def render_dashboard() -> None:
                         key=f"generate_{action_key}",
                         use_container_width=True,
                     ):
-                        with st.spinner(
-                            "Generating locally with Ollama — this can take a minute..."
-                        ):
+                        with st.spinner("Generating..."):
                             try:
                                 result = generate_article_draft(theme, content_brief)
                             except OllamaDraftError as exc:

@@ -4,9 +4,9 @@ A standalone prototype that finds recurring support questions your knowledge bas
 
 ## Why This Matters
 
-Customers often ask the same question dozens of times before anyone notices the knowledge base has no good answer for it. This prototype clusters recurring support questions, checks them against the existing knowledge base, and ranks the gaps by how many customers are affected — so content teams know exactly what to write next, backed by real evidence instead of guesswork.
+Customers often ask the same question dozens of times before anyone notices the knowledge base has no good answer for it. This prototype clusters recurring support questions, checks them against the existing knowledge base, and ranks the gaps by how many customers are affected, so content teams know exactly what to write next, backed by real evidence instead of guesswork.
 
-**Project status:** Portfolio MVP — second agent in the [AI agents for Support Operations](../README.md) portfolio, alongside [AI Support Trend Detection](..).
+**Project status:** Portfolio MVP. Second agent in the [AI agents for Support Operations](../README.md) portfolio, alongside [AI Support Trend Detection](..).
 
 > All tickets and knowledge base articles in this repository are synthetic. No customer or employer data is included.
 
@@ -27,7 +27,7 @@ flowchart LR
 ```
 
 1. Tickets are filtered to documentation-type questions; bug reports and complaints are excluded, since they are product signals, not documentation gaps.
-2. Remaining tickets are embedded (`all-MiniLM-L6-v2`) and greedily clustered into recurring themes by semantic similarity — no keyword matching.
+2. Remaining tickets are embedded (`all-MiniLM-L6-v2`) and greedily clustered into recurring themes by semantic similarity, not keyword matching.
 3. Themes with too few tickets are dropped as insufficient evidence.
 4. Each theme's centroid is compared against every knowledge base article. The best match's similarity score classifies coverage as **good**, **weak**, or **missing**.
 5. Themes are ranked missing-first, then by how many customers were affected.
@@ -39,8 +39,8 @@ flowchart LR
 
 1. Run the app (see Quick Start).
 2. The dashboard opens already analyzed: missing / weak / good coverage counts up top.
-3. **Needs attention this week** lists week-over-week coverage shifts. Each row states the recommended next step and has a matching button — **Create article** (missing), **Improve article** (weak), or **View theme** (good) — which filters to that coverage and scrolls to the theme.
-4. Filter to **Missing** to see recurring questions with no matching article (e.g. "Bulk import users via CSV" — 13 customers asked, no article exists).
+3. **Needs attention this week** lists week-over-week coverage shifts. Each row states the recommended next step and has a matching button (**Create article** for missing, **Improve article** for weak, **View theme** for good) which filters to that coverage and scrolls to the theme.
+4. Filter to **Missing** to see recurring questions with no matching article (e.g. "Bulk import users via CSV": 13 customers asked, no article exists).
 5. Expand **Draft content brief** to see linked Zendesk evidence, customer quotes, and the proposed article outline.
 6. Click **Generate draft** to create a full local draft with Ollama. Review it, regenerate if needed.
 7. Click **Publish to knowledge base** to open the demo help-center page, where **Edit** / **Unpublish** are available. Back on the dashboard the button becomes **Update published article**.
@@ -49,11 +49,11 @@ flowchart LR
 ## Example Finding
 
 **Theme:** Bulk import users via CSV
-**Coverage:** Missing — no knowledge base article addresses this at all
+**Coverage:** Missing. No knowledge base article addresses this at all
 **Evidence:** 13 recurring tickets, e.g. `T-30082` "How do I bulk import users via CSV?", `T-30083` "Bulk user import failing silently", `T-30084` "Required CSV format for user import"
 **Suggested next step:** Write a new article covering this topic end to end.
 
-Contrast with a **weak** finding — **CSV export**: an article exists ("Data Export Overview") but only mentions PDF/print export, not CSV specifics, so 7 customers still had to ask support directly.
+Contrast with a **weak** finding, **CSV export**: an article exists ("Data Export Overview") but only mentions PDF/print export, not CSV specifics, so 7 customers still had to ask support directly.
 
 ## Limitations & Human-in-the-Loop
 
@@ -63,7 +63,7 @@ See [`docs/limitations.md`](docs/limitations.md) for what this prototype does no
 
 Knowledge Gap tickets live in the **same** `data/runtime/tickets.db` as Trend Detection / Zendesk (`http://localhost:8501`). They use the `T-30xxx` id range and are tagged `knowledge-gap` so this agent can filter them without mixing into unrelated trend analysis.
 
-Evidence ticket links open the real Zendesk detail page — there is no separate mini-Zendesk.
+Evidence ticket links open the real Zendesk detail page. There is no separate mini-Zendesk.
 
 ## Quick Start
 

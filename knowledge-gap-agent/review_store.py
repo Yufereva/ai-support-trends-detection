@@ -171,12 +171,12 @@ def _next_step_for_change(kind: str, coverage: str) -> str:
     if coverage == "weak":
         if kind == "improved":
             return (
-                "Coverage improved but still Weak — expand the closest article "
+                "Coverage improved but still Weak. Expand the closest article "
                 "with the missing steps customers ask about."
             )
         return "Expand the closest article with the missing steps customers ask about."
     if kind == "improved":
-        return "Coverage improved — skim the theme and confirm the article still holds."
+        return "Coverage improved. Skim the theme and confirm the article still holds."
     return "Review the theme and keep the article current."
 
 
