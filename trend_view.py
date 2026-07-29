@@ -11,6 +11,7 @@ from textwrap import dedent
 
 import streamlit as st
 
+from escalation_quality_bridge import quality_panel_html, score_draft
 from impact import calculate_customer_impact
 from similarity import (
     DB_PATH,
@@ -805,6 +806,23 @@ def render_trend_dashboard(ticket_id: str | None = None):
         unsafe_allow_html=True,
     )
 
+    quality_report = score_draft(draft)
+    st.markdown(
+        _clean_html(
+            dedent(
+                f"""
+                <div class="trend-shell" style="padding-top:12px;padding-bottom:8px;">
+                    <div class="trend-card full" style="margin:0;">
+                        <h2>Escalation Quality (before Create in Jira)</h2>
+                        {quality_panel_html(quality_report)}
+                    </div>
+                </div>
+                """
+            )
+        ),
+        unsafe_allow_html=True,
+    )
+
     confirm_col, status_col = st.columns(
         [0.32, 0.68],
         gap="medium",
@@ -872,7 +890,14 @@ def render_trend_dashboard(ticket_id: str | None = None):
                 f"{impact['arr_at_risk_formatted']} ARR saved to the Jira draft."
             )
         elif reviewed_trend["is_potential_trend"]:
-            st.warning("Review changes are not yet confirmed for Jira.")
+            if quality_report["verdict"] == "ready":
+                st.warning("Review changes are not yet confirmed for Jira.")
+            else:
+                st.warning(
+                    f"Escalation Quality: {quality_report['verdict']} "
+                    f"({quality_report['score_pct']}%). "
+                    "You can still confirm — enrich the draft or proceed with the caveat."
+                )
         else:
             st.info(
                 f"At least {reviewed_trend['min_count']} similar tickets are required to confirm a trend."

@@ -40,6 +40,23 @@ AI Support Trend Detection is the first planned module in a portfolio of standal
 
 **Status:** planned standalone repository.
 
+## Escalation Quality Agent
+
+**Operational question:** Is this support→engineering escalation draft complete enough to hand to Engineering?
+
+**Responsibilities:**
+
+- score an escalation draft against an explicit checklist;
+- require evidence tickets, customer impact, expected vs actual, and repro/environment for a "ready" verdict;
+- surface gaps as a soft gate before Create in Jira;
+- leave the final escalate-or-enrich decision to a human reviewer.
+
+**Inputs:** engineering draft from Trend Detection (or a richer synthetic package).
+
+**Outputs:** score, verdict (`ready` / `needs_work` / `poor`), per-check pass/fail detail, and a short recommendation.
+
+**Status:** portfolio MVP in `escalation-quality-agent/`, linked from Trend Detection UI.
+
 ## Log Analysis Agent
 
 **Operational question:** Which technical signals are relevant to the reported customer behavior?
@@ -100,6 +117,8 @@ AI Support Trend Detection is the first planned module in a portfolio of standal
 flowchart TD
     A[Support evidence] --> B[Trend Detection]
     A --> C[Knowledge Gap]
+    B --> EQ[Escalation Quality]
+    EQ --> J[Create in Jira]
     B --> D[Log Analysis]
     C --> D
     D --> E[Repro Agent]
@@ -107,7 +126,7 @@ flowchart TD
     F --> G[Human-reviewed communications]
 ```
 
-This sequence is a target operating model, not a requirement that every case pass through every agent. For example, a documentation question may stop after Knowledge Gap review, while a confirmed product issue may continue through Log Analysis and Repro.
+This sequence is a target operating model, not a requirement that every case pass through every agent. For example, a documentation question may stop after Knowledge Gap review, while a confirmed product issue may continue through Log Analysis and Repro. Escalation Quality sits as a soft gate on the Trend → Jira handoff.
 
 Modules should exchange versioned evidence artifacts containing source references, privacy status, confidence, limitations, and reviewer decisions. They should not depend on undocumented shared state.
 
@@ -117,6 +136,7 @@ Public repositories should use synthetic datasets tailored to each workflow:
 
 - support tickets and account tiers for Trend Detection;
 - knowledge articles and search signals for Knowledge Gap;
+- good / needs-work / poor escalation drafts for Escalation Quality;
 - redacted application and container logs for Log Analysis;
 - environment matrices and expected behavior for Repro;
 - synthetic timelines and stakeholder updates for Incident Copilot.

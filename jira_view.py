@@ -7,6 +7,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from escalation_quality_bridge import quality_panel_html, score_draft
 from impact import calculate_customer_impact
 from similarity import (
     compute_embeddings,
@@ -445,7 +446,7 @@ JIRA_CSS = """
         border: 1px solid #DFE1E6; border-bottom: none;
         border-radius: 3px 3px 0 0;
         box-shadow: 0 8px 16px rgba(9, 30, 66, 0.25);
-        padding: 20px 24px 8px;
+        padding: 20px 24px 16px;
     }
     body.jira-create-mode .jira-create-dialog h1 {
         font-size: 20px; font-weight: 500; color: #172B4D; margin: 0;
@@ -454,6 +455,14 @@ JIRA_CSS = """
         font-size: 12px; color: #6B778C; margin: 6px 0 16px;
     }
     body.jira-create-mode .jira-create-field { margin-bottom: 12px; }
+    body.jira-create-mode .jira-create-dialog .eq-quality-panel {
+        margin: 4px 0 0 !important;
+        max-width: 100%;
+    }
+    body.jira-create-mode .jira-create-quality-wrap {
+        margin: 4px 0 0;
+        padding: 0;
+    }
     body.jira-create-mode .jira-create-field-label {
         display: block; font-size: 12px; font-weight: 600; color: #6B778C;
         margin-bottom: 4px; line-height: 1.3;
@@ -471,10 +480,14 @@ JIRA_CSS = """
         font-size: 12px; color: #6B778C; margin-left: 4px;
     }
     body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) {
-        max-width: 720px; margin: 0 auto 48px; padding: 8px 24px 16px;
+        max-width: 720px; margin: 0 auto 48px; padding: 16px 24px 16px;
         background: #fff; border: 1px solid #DFE1E6; border-top: none;
         border-radius: 0 0 3px 3px; box-shadow: 0 8px 16px rgba(9, 30, 66, 0.25);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary)
+        [data-testid="stElementContainer"]:has(.st-key-jira_create_recheck) {
+        margin: 0 0 12px !important;
     }
     body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) [data-testid="stWidgetLabel"] p,
     body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) label p {
@@ -515,7 +528,11 @@ JIRA_CSS = """
     body.jira-create-mode .jira-create-header-link { font-size: 13px; color: #0052CC; cursor: default; }
     body.jira-create-mode .jira-create-header-kebab,
     body.jira-create-mode .jira-create-header-close { font-size: 16px; color: #6B778C; cursor: default; line-height: 1; }
-    body.jira-create-mode .jira-create-header-close { font-size: 20px; }
+    body.jira-create-mode a.jira-create-header-close {
+        font-size: 20px; color: #6B778C !important; text-decoration: none !important;
+        cursor: pointer; padding: 0 2px;
+    }
+    body.jira-create-mode a.jira-create-header-close:hover { color: #172B4D !important; }
     body.jira-create-mode [data-testid="stForm"]:has(.st-key-jira_create_summary) .jira-create-toolbar {
         display: flex; align-items: center; gap: 10px; margin-top: 4px;
         border: 1px solid #DFE1E6; border-bottom: none; border-radius: 3px 3px 0 0;
@@ -606,6 +623,52 @@ def _normalize_labels(draft: dict, category: str) -> list[str]:
     return [str(part).strip() for part in labels if str(part).strip()]
 
 
+ENRICHMENT_FIELDS = (
+    ("expected_behavior", "Expected behavior"),
+    ("actual_behavior", "Actual behavior"),
+    ("reproduction_steps", "Reproduction steps"),
+    ("environment", "Environment / version"),
+)
+
+CREATE_ENRICHMENT_PATH = ROOT / "data" / "runtime" / "jira_create_enrichment.json"
+
+
+def _enrichment_values(source: dict) -> dict:
+    return {key: str(source.get(key) or "").strip() for key, _ in ENRICHMENT_FIELDS}
+
+
+def _description_with_enrichment(description: str, source: dict) -> str:
+    values = _enrichment_values(source)
+    sections = [f"{label}:\n{values[key]}" for key, label in ENRICHMENT_FIELDS if values[key]]
+    if not sections:
+        return description
+    return "\n\n".join([description.rstrip(), *sections])
+
+
+def load_create_enrichment(ticket_id: str) -> dict:
+    """Enrichment outlives a browser refresh; Streamlit session state does not."""
+    if not CREATE_ENRICHMENT_PATH.exists():
+        return {}
+    payload = json.loads(CREATE_ENRICHMENT_PATH.read_text(encoding="utf-8"))
+    return dict(payload.get("drafts", {}).get(ticket_id) or {})
+
+
+def save_create_enrichment(ticket_id: str, values: dict) -> None:
+    payload = {"drafts": {}}
+    if CREATE_ENRICHMENT_PATH.exists():
+        payload = json.loads(CREATE_ENRICHMENT_PATH.read_text(encoding="utf-8"))
+        payload.setdefault("drafts", {})
+    payload["drafts"][ticket_id] = values
+
+    CREATE_ENRICHMENT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    temporary = CREATE_ENRICHMENT_PATH.with_suffix(".json.tmp")
+    temporary.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(CREATE_ENRICHMENT_PATH)
+
+
 def _draft_issue_fields(ticket_id: str, draft: dict) -> dict:
     impact = draft.get("customer_impact") or {}
     category = draft.get("category", "support")
@@ -616,13 +679,16 @@ def _draft_issue_fields(ticket_id: str, draft: dict) -> dict:
     return {
         "priority": str(draft.get("priority", "medium")).title(),
         "summary": draft.get("title", "Support trend investigation"),
-        "description": draft.get("summary", "Support trend detected."),
+        "description": _description_with_enrichment(
+            draft.get("summary", "Support trend detected."), draft
+        ),
         "labels": _normalize_labels(draft, category),
         "trigger_ticket_id": ticket_id,
         "similar_ticket_count": draft.get("similar_count", 0),
         "zendesk_ticket_count": ticket_count,
         "arr_at_risk": arr,
         "assignee": draft.get("assignee") or "Unassigned",
+        **_enrichment_values(draft),
     }
 
 
@@ -643,6 +709,10 @@ def apply_create_form_edits(
     arr_at_risk: str | None = None,
     zendesk_ticket_count: int | None = None,
     assignee: str | None = None,
+    expected_behavior: str | None = None,
+    actual_behavior: str | None = None,
+    reproduction_steps: str | None = None,
+    environment: str | None = None,
 ) -> dict:
     """Merge editable Create-issue form values into an engineering draft."""
     updated = dict(draft)
@@ -655,6 +725,14 @@ def apply_create_form_edits(
         updated["zendesk_ticket_count"] = zendesk_ticket_count
     if assignee is not None:
         updated["assignee"] = assignee.strip() or "Unassigned"
+    for key, value in (
+        ("expected_behavior", expected_behavior),
+        ("actual_behavior", actual_behavior),
+        ("reproduction_steps", reproduction_steps),
+        ("environment", environment),
+    ):
+        if value is not None:
+            updated[key] = value.strip()
     updated.update(
         {
             "title": summary.strip() or "Support trend investigation",
@@ -753,7 +831,7 @@ def hydrate_linked_issue(issue: dict) -> dict:
     hydrated.update(
         {
             "summary": draft["title"],
-            "description": draft["summary"],
+            "description": _description_with_enrichment(draft["summary"], issue),
             "priority": draft["priority"].title(),
             "similar_ticket_count": trend["similar_count"],
             "zendesk_ticket_count": impact["total_tickets"],
@@ -1167,8 +1245,21 @@ def render_jira_issues_list(
     )
 
 
+def _close_create_requested() -> bool:
+    """The dialog × navigates to ?…&close=1 (inline onclick is stripped by Streamlit)."""
+    value = st.query_params.get("close")
+    if isinstance(value, list):
+        value = value[0] if value else None
+    return value == "1"
+
+
 def render_jira_create_form(ticket_id: str, draft: dict):
     """Editable Jira Create issue dialog. Persists only when Create is clicked."""
+    if _close_create_requested():
+        _cancel_jira_create(ticket_id)
+        return
+
+    draft = {**draft, **load_create_enrichment(ticket_id)}
     impact = draft.get("customer_impact") or {}
     category = draft.get("category", "support")
     default_labels = ", ".join(_normalize_labels(draft, category))
@@ -1184,6 +1275,12 @@ def render_jira_create_form(ticket_id: str, draft: dict):
     linked_count = impact.get("total_tickets") or (len(similar_ids) + 1)
     arr_default = impact.get("arr_at_risk_formatted", "$0")
     linked_preview = ", ".join(similar_ids[:12]) + ("…" if len(similar_ids) > 12 else "")
+    close_href = (
+        f"?mode=jira&amp;create=1&amp;ticket={html.escape(ticket_id, quote=True)}&amp;close=1"
+    )
+
+    quality_key = f"_jira_create_quality_{ticket_id}"
+    quality_report = st.session_state.get(quality_key) or score_draft(draft)
 
     st.markdown(
         f"""
@@ -1192,7 +1289,8 @@ def render_jira_create_form(ticket_id: str, draft: dict):
                 <div class="jira-create-header-row">
                     <span class="jira-create-header-link">Import issues</span>
                     <span class="jira-create-header-kebab">&#8942;</span>
-                    <span class="jira-create-header-close">&times;</span>
+                    <a class="jira-create-header-close" href="{close_href}"
+                       title="Close">&times;</a>
                 </div>
                 <h1>Create issue</h1>
                 <p class="jira-create-sub">
@@ -1207,6 +1305,9 @@ def render_jira_create_form(ticket_id: str, draft: dict):
                         <span class="jira-create-locked-meta">({PROJECT_KEY})</span>
                     </div>
                 </div>
+                <div class="jira-create-quality-wrap">
+                    {quality_panel_html(quality_report)}
+                </div>
             </div>
         </div>
         """,
@@ -1215,6 +1316,7 @@ def render_jira_create_form(ticket_id: str, draft: dict):
 
     submitted = False
     cancelled = False
+    recheck = False
     with st.form("jira_create_issue_form", clear_on_submit=False, border=False):
         col_type, col_priority = st.columns(2)
         with col_type:
@@ -1271,6 +1373,41 @@ def render_jira_create_form(ticket_id: str, draft: dict):
         )
         st.markdown(JIRA_CREATE_DROPZONE_HTML, unsafe_allow_html=True)
 
+        st.markdown(
+            '<span class="jira-create-field-label">Escalation quality details</span>',
+            unsafe_allow_html=True,
+        )
+        col_expected, col_actual = st.columns(2)
+        with col_expected:
+            expected_behavior = st.text_area(
+                "Expected behavior",
+                value=draft.get("expected_behavior", ""),
+                height=90,
+                key="jira_create_expected_behavior",
+            )
+        with col_actual:
+            actual_behavior = st.text_area(
+                "Actual behavior",
+                value=draft.get("actual_behavior", ""),
+                height=90,
+                key="jira_create_actual_behavior",
+            )
+        col_repro, col_env = st.columns(2)
+        with col_repro:
+            reproduction_steps = st.text_area(
+                "Reproduction steps",
+                value=draft.get("reproduction_steps", ""),
+                height=90,
+                key="jira_create_reproduction_steps",
+            )
+        with col_env:
+            environment = st.text_area(
+                "Environment / version",
+                value=draft.get("environment", ""),
+                height=90,
+                key="jira_create_environment",
+            )
+
         col_labels, col_cat = st.columns(2)
         with col_labels:
             labels_value = st.text_input(
@@ -1292,6 +1429,13 @@ def render_jira_create_form(ticket_id: str, draft: dict):
         if linked_preview:
             st.caption(f"Linked similar tickets: {linked_preview}")
 
+        recheck = st.form_submit_button(
+            "Re-check escalation quality",
+            type="secondary",
+            use_container_width=False,
+            key="jira_create_recheck",
+        )
+
         bottom_cols = st.columns([1.8, 3.4, 1.2, 1.5])
         with bottom_cols[0]:
             st.checkbox("Create another issue", key="jira_create_another")
@@ -1311,7 +1455,7 @@ def render_jira_create_form(ticket_id: str, draft: dict):
         _cancel_jira_create(ticket_id)
         return
 
-    if submitted:
+    if recheck or submitted:
         edited = apply_create_form_edits(
             draft,
             summary=summary,
@@ -1323,7 +1467,20 @@ def render_jira_create_form(ticket_id: str, draft: dict):
             arr_at_risk=arr_value,
             zendesk_ticket_count=linked_count,
             assignee=assignee_value,
+            expected_behavior=expected_behavior,
+            actual_behavior=actual_behavior,
+            reproduction_steps=reproduction_steps,
+            environment=environment,
         )
+        save_create_enrichment(ticket_id, _enrichment_values(edited))
+        st.session_state["_jira_create_draft"] = edited
+
+    if recheck:
+        st.session_state[quality_key] = score_draft(edited)
+        st.rerun()
+        return
+
+    if submitted:
         issue = create_jira_issue(ticket_id, edited)
         _finish_jira_create(issue)
         return
@@ -1337,6 +1494,9 @@ def _clear_jira_create_session() -> None:
         "_create_jira_requested",
     ):
         st.session_state.pop(key, None)
+    for key in list(st.session_state.keys()):
+        if str(key).startswith("_jira_create_quality_"):
+            st.session_state.pop(key, None)
 
 
 def _cancel_jira_create(ticket_id: str) -> None:
@@ -1389,11 +1549,10 @@ def render_jira_issue_detail(issue: dict, nav: str = "backlog", status_filter: s
 
     impact_html = ""
     if arr or is_trend:
-        trend_note = " · Escalated from Trend Detection Agent" if is_trend else ""
         impact_html = (
             f'<div class="jira-impact-banner">'
             f'<strong>ARR at risk:</strong> {html.escape(arr or "—")}'
-            f' &nbsp;·&nbsp; {ticket_count_text}{trend_note}'
+            f' &nbsp;·&nbsp; {ticket_count_text}'
             f"</div>{zd_link}"
         )
     elif ticket_count:

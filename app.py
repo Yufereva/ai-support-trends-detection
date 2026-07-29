@@ -11,6 +11,7 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
+from escalation_quality_bridge import format_quality_summary, score_draft
 from similarity import (
     DB_PATH,
     compute_embeddings,
@@ -2463,6 +2464,14 @@ def render_api_results_html(data: dict) -> str:
     if draft_text:
         parts.append('<div class="zd-section-label">Engineering ticket draft</div>')
         parts.append(f'<div class="draft-box">{html.escape(draft_text)}</div>')
+        draft = data.get("engineering_draft")
+        if draft:
+            quality = score_draft(draft)
+            parts.append(
+                '<div class="zd-section-label">Escalation Quality</div>'
+                f'<div style="font-size:12px;line-height:1.4;color:#2f3941;">'
+                f"{html.escape(format_quality_summary(quality))}</div>"
+            )
         ticket_id = data.get("ticket_id") or st.session_state.get("selected_ticket_id")
         if ticket_id:
             jira_href = jira_view_in_jira_link(ticket_id)

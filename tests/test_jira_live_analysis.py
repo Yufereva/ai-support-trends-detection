@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 import jira_view
 
 
@@ -37,6 +39,37 @@ def test_linked_jira_issue_replaces_stored_metrics_with_live_analysis(monkeypatc
     assert issue["description"] == "Live evidence from similarity analysis."
     assert issue["analysis_source"] == "live"
     assert len(issue["linked_support_tickets"]) == 2
+
+
+def test_live_hydration_keeps_escalation_quality_enrichment(monkeypatch):
+    stored_issue = {
+        "key": "ENG-999",
+        "summary": "Stale summary",
+        "description": "Stale description",
+        "trigger_ticket_id": "T-0004",
+        "expected_behavior": "Webhook events are delivered after retries.",
+        "actual_behavior": "Events are dropped once retries are exhausted.",
+    }
+    monkeypatch.setattr(
+        jira_view,
+        "_live_trend_analysis",
+        lambda _: {
+            "trend": {"similar_count": 3},
+            "impact": {"total_tickets": 4, "arr_at_risk_formatted": "$10K"},
+            "draft": {"title": "Live title", "summary": "Live summary.", "priority": "high"},
+            "linked_support_tickets": [],
+        },
+    )
+
+    issue = jira_view.hydrate_linked_issue(stored_issue)
+
+    assert issue["description"].startswith("Live summary.")
+    assert "Expected behavior:\nWebhook events are delivered after retries." in (
+        issue["description"]
+    )
+    assert "Actual behavior:\nEvents are dropped once retries are exhausted." in (
+        issue["description"]
+    )
 
 
 def test_linked_support_evidence_lists_every_zendesk_ticket():
@@ -139,6 +172,90 @@ def test_create_jira_issue_writes_runtime_once(monkeypatch):
         runtime_path.unlink(missing_ok=True)
 
 
+class _SessionState(dict):
+    """Minimal stand-in supporting Streamlit's attribute + item access."""
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError as exc:
+            raise AttributeError(key) from exc
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+
+def _create_draft():
+    return {
+        "title": "[Trend] Recurring Api issues (12 similar tickets)",
+        "summary": "Support trend detected across 12 tickets.",
+        "priority": "high",
+        "category": "api",
+        "trigger_ticket_id": "T-20168",
+        "similar_count": 12,
+        "similar_ticket_ids": ["T-20160", "T-20161"],
+        "customer_impact": {"total_tickets": 13, "arr_at_risk_formatted": "$484K"},
+    }
+
+
+def test_create_modal_close_icon_is_a_query_param_link(monkeypatch):
+    """× must be a real ?…&close=1 link — Streamlit strips inline onclick."""
+
+    class _StopAtForm(Exception):
+        pass
+
+    bodies: list[str] = []
+
+    monkeypatch.setattr(jira_view.st, "query_params", {})
+    monkeypatch.setattr(jira_view.st, "session_state", _SessionState())
+    monkeypatch.setattr(jira_view.st, "markdown", lambda body, **_kw: bodies.append(body))
+    monkeypatch.setattr(
+        jira_view.st, "form", lambda *_a, **_k: (_ for _ in ()).throw(_StopAtForm())
+    )
+
+    with pytest.raises(_StopAtForm):
+        jira_view.render_jira_create_form("T-20168", _create_draft())
+
+    dialog = bodies[0]
+    assert '<a class="jira-create-header-close"' in dialog
+    assert 'href="?mode=jira&amp;create=1&amp;ticket=T-20168&amp;close=1"' in dialog
+
+
+def test_create_modal_close_param_cancels_without_creating(monkeypatch):
+    """close=1 clears create-session state and returns to the Jira backlog."""
+    query_params = {"mode": "jira", "create": "1", "ticket": "T-20168", "close": "1"}
+    session = _SessionState(
+        _jira_create_draft=_create_draft(),
+        _jira_create_ticket="T-20168",
+        _jira_create_quality_T20168={"verdict": "ready"},
+        jira_issue="ENG-101",
+    )
+    reruns: list[bool] = []
+
+    monkeypatch.setattr(jira_view.st, "query_params", query_params)
+    monkeypatch.setattr(jira_view.st, "session_state", session)
+    monkeypatch.setattr(jira_view.st, "rerun", lambda: reruns.append(True))
+    monkeypatch.setattr(
+        jira_view.st, "markdown", lambda *_a, **_k: pytest.fail("modal was rendered")
+    )
+    monkeypatch.setattr(
+        jira_view.st, "form", lambda *_a, **_k: pytest.fail("form was rendered")
+    )
+    monkeypatch.setattr(
+        jira_view, "create_jira_issue", lambda *_a, **_k: pytest.fail("issue was created")
+    )
+
+    jira_view.render_jira_create_form("T-20168", _create_draft())
+
+    assert reruns == [True]
+    assert query_params == {"mode": "jira", "nav": "backlog"}
+    assert "_jira_create_draft" not in session
+    assert "_jira_create_ticket" not in session
+    assert "jira_issue" not in session
+    assert session["jira_nav"] == "backlog"
+    assert session["page_mode"] == "jira"
+
+
 def test_apply_create_form_edits_updates_draft_fields():
     draft = {
         "title": "[Trend] Original",
@@ -163,8 +280,16 @@ def test_apply_create_form_edits_updates_draft_fields():
         labels="trend-warning, api",
         arr_at_risk="$250K",
         zendesk_ticket_count=8,
+        expected_behavior="Export completes within 5 minutes.",
+        actual_behavior="Export times out after 15 minutes.",
+        reproduction_steps="Queue a 2GB export from the admin console.",
+        environment="Production EU, build 4.7.1",
     )
 
+    assert edited["expected_behavior"] == "Export completes within 5 minutes."
+    assert edited["actual_behavior"] == "Export times out after 15 minutes."
+    assert edited["reproduction_steps"] == "Queue a 2GB export from the admin console."
+    assert edited["environment"] == "Production EU, build 4.7.1"
     assert edited["title"] == "Edited summary"
     assert edited["summary"] == "Edited description"
     assert edited["priority"] == "high"
@@ -202,6 +327,10 @@ def test_create_jira_issue_uses_form_type_and_labels(monkeypatch):
         labels="trend-warning, support-escalation, billing",
         arr_at_risk="$55K",
         zendesk_ticket_count=4,
+        expected_behavior="Invoice totals match the subscription plan.",
+        actual_behavior="Invoice totals double-count seat upgrades.",
+        reproduction_steps="Upgrade seats mid-cycle, then generate the invoice.",
+        environment="Production US, billing service 2.9.0",
     )
 
     try:
@@ -210,7 +339,16 @@ def test_create_jira_issue_uses_form_type_and_labels(monkeypatch):
         assert created["type"] == "Task"
         assert created["priority"] == "Urgent"
         assert created["summary"] == "Form title"
-        assert created["description"] == "Form description"
+        assert created["description"].startswith("Form description")
+        assert "Expected behavior:\nInvoice totals match the subscription plan." in (
+            created["description"]
+        )
+        assert "Environment / version:\nProduction US, billing service 2.9.0" in (
+            created["description"]
+        )
+        assert created["reproduction_steps"] == (
+            "Upgrade seats mid-cycle, then generate the invoice."
+        )
         assert created["labels"] == [
             "trend-warning",
             "support-escalation",

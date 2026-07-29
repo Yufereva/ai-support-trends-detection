@@ -1,0 +1,90 @@
+[
+  {
+    "id": "EQ-GOOD-001",
+    "label": "Ready — full engineering handoff",
+    "expected_verdict": "ready",
+    "title": "[Trend] API key rotation breaks production auth (17 similar)",
+    "priority": "high",
+    "category": "api",
+    "trigger_ticket_id": "T-20119",
+    "similar_count": 17,
+    "similar_ticket_ids": [
+      "T-20114",
+      "T-20104",
+      "T-20108",
+      "T-20111",
+      "T-20112"
+    ],
+    "customer_impact": {
+      "total_tickets": 18,
+      "unique_accounts": 16,
+      "by_tier": {"enterprise": 9, "pro": 5, "free": 2},
+      "arr_at_risk_formatted": "$979K"
+    },
+    "summary": "Support trend: after API key rotation, production authentication fails while the same request succeeds in test.\n\nExpected behavior: rotated keys continue to authenticate production traffic without downtime.\nActual behavior: production returns 401; test environment succeeds with the same key payload.\n\nCustomer impact: 18 tickets, 16 accounts, 9 enterprise; est. ARR at risk $979K.\n\nRecommend Engineering review for a systemic auth regression.",
+    "expected_behavior": "Rotated API keys authenticate production traffic without downtime.",
+    "actual_behavior": "Production returns 401; identical requests succeed in test.",
+    "reproduction_steps": "1. Rotate API key in admin.\n2. Send authenticated request to production.\n3. Observe 401. Repeat against test — succeeds.",
+    "environment": "Production us-east-1, API gateway v2.4, Northstar Cloud enterprise tenants."
+  },
+  {
+    "id": "EQ-WEAK-001",
+    "label": "Needs work — impact present, repro missing",
+    "expected_verdict": "needs_work",
+    "title": "[Trend] Recurring billing invoice PDF failures (8 similar tickets)",
+    "priority": "medium",
+    "category": "billing",
+    "trigger_ticket_id": "T-20139",
+    "similar_count": 8,
+    "similar_ticket_ids": ["T-20131", "T-20132", "T-20133", "T-20134", "T-20135"],
+    "customer_impact": {
+      "total_tickets": 9,
+      "unique_accounts": 7,
+      "by_tier": {"enterprise": 2, "pro": 4, "free": 1},
+      "arr_at_risk_formatted": "$210K"
+    },
+    "summary": "Support trend detected: 8 tickets with high similarity to T-20139 about invoice PDF download failures in the billing portal.\n\nCategory: billing\nTrigger ticket: Customers cannot download invoice PDFs from the portal.\n\nCustomer impact:\n- 9 tickets, 7 unique accounts, 2 enterprise\n- Est. ARR at risk: $210K (Salesforce)\n\nSample subjects:\n- Invoice PDF download returns blank page\n- Cannot export last month invoice\n- Billing portal PDF spinner never finishes\n\nRecommend engineering review for potential systemic billing issue."
+  },
+  {
+    "id": "EQ-POOR-001",
+    "label": "Poor — thin escalation, no evidence",
+    "expected_verdict": "poor",
+    "title": "Bug",
+    "priority": "",
+    "category": "technical",
+    "trigger_ticket_id": null,
+    "similar_count": 1,
+    "similar_ticket_ids": [],
+    "customer_impact": {
+      "total_tickets": 1,
+      "unique_accounts": 0,
+      "by_tier": {},
+      "arr_at_risk_formatted": "$0"
+    },
+    "summary": "Something is broken. Please fix."
+  },
+  {
+    "id": "EQ-LIVE-SHAPE-001",
+    "label": "Trend Detection live shape — typically needs work",
+    "expected_verdict": "needs_work",
+    "title": "[Trend] Recurring Api issues (12 similar tickets)",
+    "priority": "high",
+    "category": "api",
+    "trigger_ticket_id": "T-20168",
+    "similar_count": 12,
+    "similar_ticket_ids": [
+      "T-20160",
+      "T-20161",
+      "T-20162",
+      "T-20163",
+      "T-20164"
+    ],
+    "customer_impact": {
+      "total_tickets": 13,
+      "unique_accounts": 9,
+      "by_tier": {"enterprise": 4, "pro": 3, "free": 2},
+      "arr_at_risk_formatted": "$484K"
+    },
+    "summary": "Support trend detected: 12 tickets with similarity >= 60% to ticket T-20168.\n\nCategory: api\nTrigger ticket: Webhook delivery retries exhaust and drop events.\n\nCustomer impact:\n- 13 tickets, 9 unique accounts, 4 enterprise\n- Est. ARR at risk: $484K (Salesforce)\n\nSample subjects:\n- Webhook retries exhaust and drop events\n- Missed webhook after retry storm\n- Events missing after delivery backoff\n\nRecommend engineering review for potential systemic api issue."
+  }
+]
