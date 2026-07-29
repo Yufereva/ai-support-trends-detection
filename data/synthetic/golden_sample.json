@@ -1,0 +1,1431 @@
+{
+  "dataset": "northstar-cloud-support-v2-golden-sample",
+  "version": "0.1.0",
+  "synthetic": true,
+  "ticket_count": 20,
+  "tickets": [
+    {
+      "id": "T-20001",
+      "created_at": "2026-07-01T08:15:00",
+      "subject": "Production API key returns 401 after rotation",
+      "body": "We rotated our API key this morning and now production is completely blocked. The new key works in staging, but every production request returns 401 invalid_credentials. The fingerprint ends in 7F2A. We need help quickly because our integration is down.",
+      "category": "api",
+      "priority": "high",
+      "status": "resolved",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-101",
+        "name": "Cedar Analytics",
+        "arr": 72000,
+        "region": "AMER"
+      },
+      "requester": "Maya Brooks",
+      "assignee": "Daniel Cho",
+      "channel": "email",
+      "tags": [
+        "api",
+        "authentication",
+        "production",
+        "key-rotation"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Maya Brooks",
+          "text": "We rotated our API key this morning and now production is completely blocked. The new key works in staging, but every production request returns 401 invalid_credentials. The fingerprint ends in 7F2A. We need help quickly because our integration is down.",
+          "timestamp": "2026-07-01T08:15:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Daniel Cho",
+          "text": "I'm sorry this took your production integration offline. I checked fingerprint 7F2A and it is active in both environments. Please send one failed production request ID and its timestamp so I can escalate this to API Platform. Do not send the key value.",
+          "timestamp": "2026-07-01T08:53:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Maya Brooks",
+          "text": "Request req-demo-1048 failed at 08:42 UTC. We even created another key, and it failed the same way in production. Staging still works, so this is getting pretty frustrating.",
+          "timestamp": "2026-07-01T10:20:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "API Platform",
+          "text": "Reproduced on production gateway pgw-2. The key-rotation event was present in the control plane but missing from the gateway invalidation stream. Replayed the event and started a cache consistency review.",
+          "timestamp": "2026-07-01T11:15:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Daniel Cho",
+          "text": "API Platform found that one production validator had missed the key-rotation update. They resynchronized it and confirmed that req-demo-1048 now returns 200. Please retry from your service before I close the case.",
+          "timestamp": "2026-07-01T12:35:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Maya Brooks",
+          "text": "Confirmed. The same production request now returns 200, and we did not need to rotate the key again.",
+          "timestamp": "2026-07-01T13:20:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "api_key_rotation_prod_401",
+        "root_cause": "Production API gateway retained stale key-validation cache entries after rotation.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20002",
+      "created_at": "2026-07-01T09:05:00",
+      "subject": "New service credential rejected by production gateway",
+      "body": "Something is wrong with credentials created after this morning's maintenance. Our new service credential works in sandbox but gets a 401 from api.northstar.example in production. Older credentials still work, but we cannot rely on them much longer.",
+      "category": "api",
+      "priority": "high",
+      "status": "resolved",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-103",
+        "name": "Harbor Systems",
+        "arr": 96000,
+        "region": "EMEA"
+      },
+      "requester": "Owen Price",
+      "assignee": "Lena Ortiz",
+      "channel": "chat",
+      "tags": [
+        "api",
+        "authentication",
+        "production",
+        "service-account"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Owen Price",
+          "text": "Something is wrong with credentials created after this morning's maintenance. Our new service credential works in sandbox but gets a 401 from api.northstar.example in production. Older credentials still work, but we cannot rely on them much longer.",
+          "timestamp": "2026-07-01T09:05:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Lena Ortiz",
+          "text": "I'm sorry you're stuck using an older credential. The difference between old and newly created credentials is useful. Please share the creation timestamp and one failed request ID, and I'll have API Platform compare production validation with sandbox.",
+          "timestamp": "2026-07-01T09:43:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Owen Price",
+          "text": "The credential was created at 08:51 UTC, and request req-demo-2190 failed at 09:11 UTC. We have not changed scopes, IP allowlists, or the service account.",
+          "timestamp": "2026-07-01T11:10:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "API Platform",
+          "text": "Confirmed that credentials created after 08:30 UTC were absent from one production validator. Replayed the missed invalidation batch; no customer configuration change is required.",
+          "timestamp": "2026-07-01T12:05:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Lena Ortiz",
+          "text": "API Platform confirmed that one production validator had missed the credential update. They replayed the update and verified the new credential. Please test the same production call again.",
+          "timestamp": "2026-07-01T13:25:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Owen Price",
+          "text": "The new service credential is working in production now. Our old credential is no longer needed.",
+          "timestamp": "2026-07-01T14:10:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "api_key_rotation_prod_401",
+        "root_cause": "Production API gateway retained stale key-validation cache entries after rotation.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20003",
+      "created_at": "2026-07-01T10:20:00",
+      "subject": "Rotated key accepted in test but rejected in live environment",
+      "body": "This is urgent: our checkout integration is down. The replacement key passes the test endpoint, but live calls fail with invalid_credentials. We already revoked the previous key as part of our security process, so we have no fallback.",
+      "category": "api",
+      "priority": "urgent",
+      "status": "resolved",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-102",
+        "name": "Brightline Health",
+        "arr": 48000,
+        "region": "AMER"
+      },
+      "requester": "Nora Singh",
+      "assignee": "Daniel Cho",
+      "channel": "api",
+      "tags": [
+        "api",
+        "authentication",
+        "production",
+        "incident"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Nora Singh",
+          "text": "This is urgent: our checkout integration is down. The replacement key passes the test endpoint, but live calls fail with invalid_credentials. We already revoked the previous key as part of our security process, so we have no fallback.",
+          "timestamp": "2026-07-01T10:20:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Daniel Cho",
+          "text": "I'm sorry this is stopping checkout. I'm treating it as a production incident: the key is active, and I've opened a priority escalation with API Platform. Please send one failed live request ID so the incident team can trace it.",
+          "timestamp": "2026-07-01T10:58:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Nora Singh",
+          "text": "The latest failure is req-demo-3307 at 10:44 UTC. Customers still cannot check out. Do we need to rotate the key again, or will that just leave us in the same situation?",
+          "timestamp": "2026-07-01T12:25:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Incident Commander",
+          "text": "Declared a production authentication incident. Traffic was shifted away from the stale validator while API Platform synchronized credential state and checked recent rotations.",
+          "timestamp": "2026-07-01T13:20:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Daniel Cho",
+          "text": "The incident team restored consistent credential state across production and confirmed successful live requests. No second rotation is needed. Please verify checkout traffic from your side.",
+          "timestamp": "2026-07-01T14:40:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Nora Singh",
+          "text": "Confirmed that checkout traffic is healthy again. We see successful live requests from both regions.",
+          "timestamp": "2026-07-01T15:25:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "api_key_rotation_prod_401",
+        "root_cause": "Production API gateway retained stale key-validation cache entries after rotation.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20004",
+      "created_at": "2026-07-01T11:10:00",
+      "subject": "Terraform-created API key fails only on production",
+      "body": "We followed the documented Terraform flow, but the new API key is unusable in production. It works in staging, while production returns 401. The console says it is active and the scopes match the previous key. What are we missing?",
+      "category": "api",
+      "priority": "high",
+      "status": "pending",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-104",
+        "name": "Juniper Works",
+        "arr": 24000,
+        "region": "APAC"
+      },
+      "requester": "Eli Tan",
+      "assignee": "Lena Ortiz",
+      "channel": "email",
+      "tags": [
+        "api",
+        "authentication",
+        "terraform",
+        "production"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Eli Tan",
+          "text": "We followed the documented Terraform flow, but the new API key is unusable in production. It works in staging, while production returns 401. The console says it is active and the scopes match the previous key. What are we missing?",
+          "timestamp": "2026-07-01T11:10:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Lena Ortiz",
+          "text": "I'm sorry the documented flow left you with a key that doesn't work. Your scopes and active state look correct, and the staging result points to production validation. Please send one failed request ID so I can escalate a trace to API Platform.",
+          "timestamp": "2026-07-01T11:48:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Eli Tan",
+          "text": "Request req-demo-4412 failed at 11:26 UTC. We can temporarily use the older key, but it expires tomorrow; please let us know when the new key is ready for another Terraform test.",
+          "timestamp": "2026-07-01T13:15:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "API Platform",
+          "text": "Gateway pgw-3 was drained and its credential state was resynchronized. Verification succeeds, but keep the ticket pending until the customer tests from the Terraform-managed workload.",
+          "timestamp": "2026-07-01T14:10:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Lena Ortiz",
+          "text": "API Platform resynchronized the affected production validator and their verification request succeeds. I am keeping the ticket pending until you confirm the new key from the Terraform-managed workload.",
+          "timestamp": "2026-07-01T15:30:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "api_key_rotation_prod_401",
+        "root_cause": "Production API gateway retained stale key-validation cache entries after rotation.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20005",
+      "created_at": "2026-07-02T07:40:00",
+      "subject": "Webhook deliveries delayed by eighteen minutes",
+      "body": "Our webhook deliveries are suddenly 15 to 20 minutes late even though events are accepted immediately. The dashboard just shows them queued in eu-west. This is holding up customer orders.",
+      "category": "webhooks",
+      "priority": "high",
+      "status": "resolved",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-105",
+        "name": "Lattice Field",
+        "arr": 18000,
+        "region": "EMEA"
+      },
+      "requester": "Sofia Marin",
+      "assignee": "Iris Cole",
+      "channel": "chat",
+      "tags": [
+        "webhooks",
+        "delivery-delay",
+        "eu-west",
+        "queue"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Sofia Marin",
+          "text": "Our webhook deliveries are suddenly 15 to 20 minutes late even though events are accepted immediately. The dashboard just shows them queued in eu-west. This is holding up customer orders.",
+          "timestamp": "2026-07-02T07:40:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Iris Cole",
+          "text": "I'm sorry these delays are affecting your orders. I can confirm the events are queued on our side, not failing at your endpoint. The eu-west workers are below their normal rate, so you don't need to retry or change your receiver while I escalate this.",
+          "timestamp": "2026-07-02T08:18:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Sofia Marin",
+          "text": "We have had to pause fulfillment now. The newest event is eighteen minutes old, and the queue is still growing. Please treat this as urgent.",
+          "timestamp": "2026-07-02T09:45:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Webhook Platform",
+          "text": "eu-west delivery queue exceeded the autoscaling target after a traffic spike. Added workers, preserved ordering, and confirmed that no queued events were dropped.",
+          "timestamp": "2026-07-02T10:40:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Iris Cole",
+          "text": "Webhook Platform added eu-west worker capacity and cleared the backlog without dropping events. New deliveries are below thirty seconds. Please confirm that your order workflow received the delayed sequence.",
+          "timestamp": "2026-07-02T12:00:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Sofia Marin",
+          "text": "The delayed events arrived in order, and new deliveries are consistently under thirty seconds.",
+          "timestamp": "2026-07-02T12:45:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "webhook_eu_worker_backlog",
+        "root_cause": "EU webhook delivery workers failed to scale with a traffic spike.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20006",
+      "created_at": "2026-07-02T08:05:00",
+      "subject": "Successful webhooks remain queued in EU region",
+      "body": "Production webhooks have been pending for twelve minutes, but our endpoint is healthy and direct test deliveries arrive immediately. We have checked our receiver twice. Why are real events not moving?",
+      "category": "webhooks",
+      "priority": "high",
+      "status": "resolved",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-103",
+        "name": "Harbor Systems",
+        "arr": 96000,
+        "region": "EMEA"
+      },
+      "requester": "Jonas Weber",
+      "assignee": "Iris Cole",
+      "channel": "email",
+      "tags": [
+        "webhooks",
+        "delivery-delay",
+        "eu-west",
+        "queue"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Jonas Weber",
+          "text": "Production webhooks have been pending for twelve minutes, but our endpoint is healthy and direct test deliveries arrive immediately. We have checked our receiver twice. Why are real events not moving?",
+          "timestamp": "2026-07-02T08:05:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Iris Cole",
+          "text": "I'm sorry you've had to keep checking a healthy endpoint. Test deliveries take a separate path, and our telemetry confirms production events are waiting in the eu-west queue. I've escalated the queue depth and oldest-event age to Webhook Platform.",
+          "timestamp": "2026-07-02T08:43:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Jonas Weber",
+          "text": "The queue has jumped from 800 to 1,900 while we have been talking, and we still have no production deliveries. We need an update as soon as possible.",
+          "timestamp": "2026-07-02T10:10:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Webhook Platform",
+          "text": "Production delivery workers were saturated; test-delivery workers were unaffected. Scaled the production pool and monitored queue depth to zero.",
+          "timestamp": "2026-07-02T11:05:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Iris Cole",
+          "text": "Webhook Platform scaled the production worker pool and reports that queue depth is back to zero. Their event audit shows no drops. Please compare the delivered IDs with your receiver log.",
+          "timestamp": "2026-07-02T12:25:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Jonas Weber",
+          "text": "Confirmed. The queue is empty and our receiver has all expected event IDs.",
+          "timestamp": "2026-07-02T13:10:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "webhook_eu_worker_backlog",
+        "root_cause": "EU webhook delivery workers failed to scale with a traffic spike.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20007",
+      "created_at": "2026-07-02T08:35:00",
+      "subject": "Order events arrive long after they are created",
+      "body": "Our EU order events are arriving about sixteen minutes late, while US events still arrive in under a minute through the same receiver. Warehouse automation is falling behind, so this is becoming a serious operational issue.",
+      "category": "webhooks",
+      "priority": "urgent",
+      "status": "resolved",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-101",
+        "name": "Cedar Analytics",
+        "arr": 72000,
+        "region": "AMER"
+      },
+      "requester": "Amelia Reed",
+      "assignee": "Marcus Lee",
+      "channel": "api",
+      "tags": [
+        "webhooks",
+        "delivery-delay",
+        "eu-west",
+        "incident"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Amelia Reed",
+          "text": "Our EU order events are arriving about sixteen minutes late, while US events still arrive in under a minute through the same receiver. Warehouse automation is falling behind, so this is becoming a serious operational issue.",
+          "timestamp": "2026-07-02T08:35:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Marcus Lee",
+          "text": "I'm sorry this is disrupting warehouse operations. The regional difference points to our EU delivery service, and telemetry shows a backlog growing since 08:00 UTC. I've opened a priority incident and will keep this case tied to it.",
+          "timestamp": "2026-07-02T09:13:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Amelia Reed",
+          "text": "Can you give us an estimate? The oldest missing order is from 08:14 UTC, and the warehouse team needs to know whether to switch to a manual process.",
+          "timestamp": "2026-07-02T10:40:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Incident Commander",
+          "text": "Opened incident INC-DEMO-27 for eu-west webhook latency. Capacity was increased and the oldest event was tracked through successful delivery.",
+          "timestamp": "2026-07-02T11:35:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Marcus Lee",
+          "text": "The incident team cleared the backlog at 09:02 UTC and traced the 08:14 event through delivery. Please confirm that warehouse automation has processed that event and the later sequence.",
+          "timestamp": "2026-07-02T12:55:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Amelia Reed",
+          "text": "Warehouse automation is current again. We verified the 08:14 event and the later sequence.",
+          "timestamp": "2026-07-02T13:40:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "webhook_eu_worker_backlog",
+        "root_cause": "EU webhook delivery workers failed to scale with a traffic spike.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20008",
+      "created_at": "2026-07-02T09:00:00",
+      "subject": "EU webhook queue age keeps increasing",
+      "body": "Our EU audit-event queue is already nine minutes behind and getting worse. There are no delivery attempts in our server logs, so please do not send us through another endpoint troubleshooting checklist.",
+      "category": "webhooks",
+      "priority": "high",
+      "status": "pending",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-104",
+        "name": "Juniper Works",
+        "arr": 24000,
+        "region": "APAC"
+      },
+      "requester": "Kenji Mori",
+      "assignee": "Marcus Lee",
+      "channel": "chat",
+      "tags": [
+        "webhooks",
+        "delivery-delay",
+        "eu-west",
+        "audit-events"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Kenji Mori",
+          "text": "Our EU audit-event queue is already nine minutes behind and getting worse. There are no delivery attempts in our server logs, so please do not send us through another endpoint troubleshooting checklist.",
+          "timestamp": "2026-07-02T09:00:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Marcus Lee",
+          "text": "You're right; this is not an endpoint rejection, and I won't ask you to repeat those checks. Our delivery log shows no attempt yet. I've added your rising queue age to the active eu-west escalation, and Webhook Platform is adding capacity.",
+          "timestamp": "2026-07-02T09:38:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Kenji Mori",
+          "text": "Queue age peaked at fourteen minutes and is now falling. We have received some older events but not the newest batch.",
+          "timestamp": "2026-07-02T11:05:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Webhook Platform",
+          "text": "Queue age is decreasing after capacity was added. New events are healthy; leave the case pending until the customer's final queued batch is observed.",
+          "timestamp": "2026-07-02T12:00:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Marcus Lee",
+          "text": "Webhook Platform reports that new events are dispatching normally and the backlog is nearly clear. I am leaving this pending until you confirm receipt of the final queued batch.",
+          "timestamp": "2026-07-02T13:20:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "webhook_eu_worker_backlog",
+        "root_cause": "EU webhook delivery workers failed to scale with a traffic spike.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20009",
+      "created_at": "2026-07-03T13:10:00",
+      "subject": "Seat downgrade created a duplicate prorated charge",
+      "body": "We reduced our plan from 80 to 65 seats yesterday, but today's invoice charges the same adjustment twice. That adds $1,240 we do not owe. Please fix this before anything is charged.",
+      "category": "billing",
+      "priority": "high",
+      "status": "resolved",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-102",
+        "name": "Brightline Health",
+        "arr": 48000,
+        "region": "AMER"
+      },
+      "requester": "Grace Kim",
+      "assignee": "Ava Morgan",
+      "channel": "email",
+      "tags": [
+        "billing",
+        "proration",
+        "duplicate-charge",
+        "seat-change"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Grace Kim",
+          "text": "We reduced our plan from 80 to 65 seats yesterday, but today's invoice charges the same adjustment twice. That adds $1,240 we do not owe. Please fix this before anything is charged.",
+          "timestamp": "2026-07-03T13:10:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Ava Morgan",
+          "text": "I'm sorry we issued an invoice with a duplicate charge. I matched both lines to the same seat-change event and placed the invoice on hold, so it will not be collected while Billing Operations corrects it.",
+          "timestamp": "2026-07-03T13:48:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Grace Kim",
+          "text": "Thank you for stopping the charge. Both lines have the same service period and quantity, and Finance needs a corrected invoice before Friday. Can you make sure this will not happen again on the next invoice?",
+          "timestamp": "2026-07-03T15:15:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Billing Operations",
+          "text": "Both invoice lines reference the same seat-change event. A timed-out proration worker retried without an idempotency check. Removed the duplicate and regenerated the invoice.",
+          "timestamp": "2026-07-03T16:10:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Ava Morgan",
+          "text": "Billing Operations confirmed a duplicate retry, voided the extra line, and issued invoice INV-DEMO-204. Please verify the new total before we release the invoice hold.",
+          "timestamp": "2026-07-03T17:30:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Grace Kim",
+          "text": "The corrected invoice contains one adjustment and the total now matches our purchase records.",
+          "timestamp": "2026-07-03T18:15:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "billing_duplicate_proration",
+        "root_cause": "A timed-out proration job retried without an idempotency guard.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20010",
+      "created_at": "2026-07-03T13:45:00",
+      "subject": "Two identical credits appeared after plan change",
+      "body": "What is going on with our draft invoice? We changed plans once, but it now shows the same proration credit twice. Please do not finalize an invoice with the wrong balance.",
+      "category": "billing",
+      "priority": "medium",
+      "status": "resolved",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-105",
+        "name": "Lattice Field",
+        "arr": 18000,
+        "region": "EMEA"
+      },
+      "requester": "Theo Martin",
+      "assignee": "Ava Morgan",
+      "channel": "chat",
+      "tags": [
+        "billing",
+        "proration",
+        "duplicate-credit",
+        "plan-change"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Theo Martin",
+          "text": "What is going on with our draft invoice? We changed plans once, but it now shows the same proration credit twice. Please do not finalize an invoice with the wrong balance.",
+          "timestamp": "2026-07-03T13:45:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Ava Morgan",
+          "text": "I'm sorry the draft is wrong. I can see that both credits point to the same plan change, and I've paused finalization so the incorrect balance cannot be issued. Billing Operations is removing the duplicate now.",
+          "timestamp": "2026-07-03T14:23:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Theo Martin",
+          "text": "Good, thank you for pausing it. The credits have exactly the same amount and timestamp. We should see only one credit when the new draft is ready.",
+          "timestamp": "2026-07-03T15:50:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Billing Operations",
+          "text": "Paused invoice finalization, removed the duplicate credit, and regenerated the draft. Engineering work item BILL-DEMO-18 tracks idempotency on plan-change retries.",
+          "timestamp": "2026-07-03T16:45:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Ava Morgan",
+          "text": "Billing Operations removed the duplicate credit and regenerated the draft invoice. Please review the balance; the engineering correction for retry handling is tracked separately.",
+          "timestamp": "2026-07-03T18:05:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Theo Martin",
+          "text": "The regenerated draft has a single credit and the balance is correct. You can allow it to finalize.",
+          "timestamp": "2026-07-03T18:50:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "billing_duplicate_proration",
+        "root_cause": "A timed-out proration job retried without an idempotency guard.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20011",
+      "created_at": "2026-07-03T14:20:00",
+      "subject": "Invoice repeats one mid-cycle upgrade adjustment",
+      "body": "We made one storage upgrade, but the invoice lists the $860 adjustment twice. We cannot approve a bill that charges us twice for the same change.",
+      "category": "billing",
+      "priority": "high",
+      "status": "resolved",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-103",
+        "name": "Harbor Systems",
+        "arr": 96000,
+        "region": "EMEA"
+      },
+      "requester": "Isaac Bell",
+      "assignee": "Mina Shah",
+      "channel": "email",
+      "tags": [
+        "billing",
+        "proration",
+        "duplicate-charge",
+        "storage-upgrade"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Isaac Bell",
+          "text": "We made one storage upgrade, but the invoice lists the $860 adjustment twice. We cannot approve a bill that charges us twice for the same change.",
+          "timestamp": "2026-07-03T14:20:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Mina Shah",
+          "text": "I'm sorry about the duplicate charge. Both lines reference the same upgrade event, and I've blocked automatic collection while Billing Operations corrects the invoice.",
+          "timestamp": "2026-07-03T14:58:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Isaac Bell",
+          "text": "Automatic payment is tomorrow, so we need the corrected invoice today. Our purchase order only covers the original amount, and Finance will reject anything higher.",
+          "timestamp": "2026-07-03T16:25:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Billing Operations",
+          "text": "Verified one storage upgrade event and two ledger adjustments. Cancelled the duplicate before collection and regenerated the invoice.",
+          "timestamp": "2026-07-03T17:20:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Mina Shah",
+          "text": "Billing Operations cancelled the duplicate adjustment and regenerated the invoice before payment. Please confirm that the corrected invoice matches your purchase order.",
+          "timestamp": "2026-07-03T18:40:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Isaac Bell",
+          "text": "We received the corrected invoice before payment, and the duplicate $860 line is gone.",
+          "timestamp": "2026-07-03T19:25:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "billing_duplicate_proration",
+        "root_cause": "A timed-out proration job retried without an idempotency guard.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20012",
+      "created_at": "2026-07-03T15:00:00",
+      "subject": "Downgrade adjustment is listed twice on renewal invoice",
+      "body": "Our renewal invoice shows the downgrade adjustment twice, and the Billing API returns two lines with the same source event and amount. This is blocking our month-end reconciliation. Please correct it urgently.",
+      "category": "billing",
+      "priority": "high",
+      "status": "pending",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-101",
+        "name": "Cedar Analytics",
+        "arr": 72000,
+        "region": "AMER"
+      },
+      "requester": "Leah Foster",
+      "assignee": "Mina Shah",
+      "channel": "api",
+      "tags": [
+        "billing",
+        "proration",
+        "duplicate-charge",
+        "renewal"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Leah Foster",
+          "text": "Our renewal invoice shows the downgrade adjustment twice, and the Billing API returns two lines with the same source event and amount. This is blocking our month-end reconciliation. Please correct it urgently.",
+          "timestamp": "2026-07-03T15:00:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Mina Shah",
+          "text": "I'm sorry this is holding up your reconciliation. The duplicated source event confirms there was only one change. I've blocked collection and asked Billing Operations to remove the extra ledger entry and regenerate the invoice.",
+          "timestamp": "2026-07-03T15:38:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Leah Foster",
+          "text": "Thanks for pausing collection, but the API still returns both lines and Finance cannot close the account. Please let us know as soon as the corrected record is available.",
+          "timestamp": "2026-07-03T17:05:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Billing Operations",
+          "text": "Collection remains blocked. The duplicate ledger entry is removed and invoice regeneration is running; keep the support case pending until the Billing API returns one line.",
+          "timestamp": "2026-07-03T18:00:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Mina Shah",
+          "text": "Billing Operations removed the duplicate ledger entry and the corrected invoice is generating. I will keep the ticket pending until you confirm that the Billing API returns one adjustment.",
+          "timestamp": "2026-07-03T19:20:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "billing_duplicate_proration",
+        "root_cause": "A timed-out proration job retried without an idempotency guard.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20013",
+      "created_at": "2026-07-04T06:30:00",
+      "subject": "Removed SSO group still grants admin access",
+      "body": "This is a security issue. We removed an employee from Northstar-Admins in our IdP, SCIM says it succeeded, and thirty minutes later the user still has admin access. We need that access removed immediately.",
+      "category": "identity",
+      "priority": "urgent",
+      "status": "resolved",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-103",
+        "name": "Harbor Systems",
+        "arr": 96000,
+        "region": "EMEA"
+      },
+      "requester": "Hannah Vogel",
+      "assignee": "Noah Park",
+      "channel": "email",
+      "tags": [
+        "sso",
+        "scim",
+        "access-removal",
+        "security"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Hannah Vogel",
+          "text": "This is a security issue. We removed an employee from Northstar-Admins in our IdP, SCIM says it succeeded, and thirty minutes later the user still has admin access. We need that access removed immediately.",
+          "timestamp": "2026-07-04T06:30:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Noah Park",
+          "text": "I'm sorry the access removal did not take effect. I verified that SCIM recorded it but the workspace role did not change. I've opened an urgent access-removal incident with Identity Engineering and will stay on the case until access is confirmed blocked.",
+          "timestamp": "2026-07-04T07:08:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Hannah Vogel",
+          "text": "We disabled the employee in the IdP as a precaution, but Northstar still shows the admin role. This should be immediate, correct? We need confirmation that the account cannot get back in.",
+          "timestamp": "2026-07-04T08:35:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Identity Engineering",
+          "text": "SCIM directory state was correct, but the authorization invalidation consumer was stalled. Restarted the consumer, replayed events, and reviewed recent admin-group removals.",
+          "timestamp": "2026-07-04T09:30:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Noah Park",
+          "text": "Identity Engineering restored membership synchronization and reviewed recent admin-group removals in your workspace. Removal should be immediate; please test the employee account once more.",
+          "timestamp": "2026-07-04T10:50:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Hannah Vogel",
+          "text": "Confirmed. The removed employee no longer has admin access, including after signing in again.",
+          "timestamp": "2026-07-04T11:35:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "scim_group_cache_stale",
+        "root_cause": "The authorization service did not invalidate cached SCIM group memberships.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20014",
+      "created_at": "2026-07-04T07:05:00",
+      "subject": "SCIM deprovisioned user remains signed in",
+      "body": "We deactivated a contractor, but they can still open the admin dashboard with an existing session even though SCIM returned 200. This is unacceptable for a deprovisioned account. Please revoke access now.",
+      "category": "identity",
+      "priority": "urgent",
+      "status": "resolved",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-101",
+        "name": "Cedar Analytics",
+        "arr": 72000,
+        "region": "AMER"
+      },
+      "requester": "Caleb Ross",
+      "assignee": "Noah Park",
+      "channel": "chat",
+      "tags": [
+        "sso",
+        "scim",
+        "deprovisioning",
+        "security"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Caleb Ross",
+          "text": "We deactivated a contractor, but they can still open the admin dashboard with an existing session even though SCIM returned 200. This is unacceptable for a deprovisioned account. Please revoke access now.",
+          "timestamp": "2026-07-04T07:05:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Noah Park",
+          "text": "You're right to treat this as urgent, and I'm sorry the session remained active. The directory shows the contractor as deprovisioned. I've opened a Security Operations case to revoke the session immediately and check related removals.",
+          "timestamp": "2026-07-04T07:43:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Caleb Ross",
+          "text": "The session still opens the dashboard. We deprovisioned two other users this morning too, so please check them as well. We need to know the scope of this issue.",
+          "timestamp": "2026-07-04T09:10:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Security Operations",
+          "text": "Revoked the contractor session and identified three stale membership entries from the same invalidation delay. Cleared them and verified that no affected session remains active.",
+          "timestamp": "2026-07-04T10:05:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Noah Park",
+          "text": "Security Operations revoked the session and reviewed deprovision events from the affected period. They found and removed three stale memberships. Please test the contractor and the other recent removals.",
+          "timestamp": "2026-07-04T11:25:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Caleb Ross",
+          "text": "We tested the contractor account and two other deprovisioned users. All access is now blocked.",
+          "timestamp": "2026-07-04T12:10:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "scim_group_cache_stale",
+        "root_cause": "The authorization service did not invalidate cached SCIM group memberships.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20015",
+      "created_at": "2026-07-04T07:40:00",
+      "subject": "IdP group removal not reflected in workspace roles",
+      "body": "We removed two users from the Finance group, but both still have the Finance role in Northstar even though the SCIM PATCH requests succeeded. They can see sensitive financial data they should no longer have.",
+      "category": "identity",
+      "priority": "high",
+      "status": "resolved",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-104",
+        "name": "Juniper Works",
+        "arr": 24000,
+        "region": "APAC"
+      },
+      "requester": "Rina Sato",
+      "assignee": "Priya Nair",
+      "channel": "api",
+      "tags": [
+        "sso",
+        "scim",
+        "group-sync",
+        "workspace-roles"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Rina Sato",
+          "text": "We removed two users from the Finance group, but both still have the Finance role in Northstar even though the SCIM PATCH requests succeeded. They can see sensitive financial data they should no longer have.",
+          "timestamp": "2026-07-04T07:40:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Priya Nair",
+          "text": "I'm sorry those permissions remained in place. I confirmed both SCIM requests succeeded while the workspace roles stayed unchanged. I've escalated the request IDs and affected users to Identity Engineering as a high-priority access issue.",
+          "timestamp": "2026-07-04T08:18:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Rina Sato",
+          "text": "We signed both users out manually, but their roles did not change. We have disabled the accounts in the IdP for now. Please tell us when it is safe to re-enable them.",
+          "timestamp": "2026-07-04T09:45:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Identity Engineering",
+          "text": "Confirmed successful SCIM PATCH requests and stale role-evaluation data. Replayed the membership invalidation events and verified both Finance roles were removed.",
+          "timestamp": "2026-07-04T10:40:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Priya Nair",
+          "text": "Identity Engineering replayed the delayed membership updates and verified that both Finance roles were removed. Please compare the workspace roles with your IdP once more.",
+          "timestamp": "2026-07-04T12:00:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Rina Sato",
+          "text": "Both users have lost the Finance role. Our IdP and Northstar now show the same memberships.",
+          "timestamp": "2026-07-04T12:45:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "scim_group_cache_stale",
+        "root_cause": "The authorization service did not invalidate cached SCIM group memberships.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20016",
+      "created_at": "2026-07-04T08:15:00",
+      "subject": "Role persists after SCIM group membership deletion",
+      "body": "SCIM deleted a user's Operations membership at 07:42 UTC, but Northstar still gives them the Operations role. There were no SCIM errors. We cannot tell whether this is one user or a wider access problem.",
+      "category": "identity",
+      "priority": "high",
+      "status": "pending",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-102",
+        "name": "Brightline Health",
+        "arr": 48000,
+        "region": "AMER"
+      },
+      "requester": "Marcus Hill",
+      "assignee": "Priya Nair",
+      "channel": "email",
+      "tags": [
+        "sso",
+        "scim",
+        "group-sync",
+        "authorization-cache"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Marcus Hill",
+          "text": "SCIM deleted a user's Operations membership at 07:42 UTC, but Northstar still gives them the Operations role. There were no SCIM errors. We cannot tell whether this is one user or a wider access problem.",
+          "timestamp": "2026-07-04T08:15:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Priya Nair",
+          "text": "I'm sorry the role was not removed as expected. I confirmed the directory deletion and the unchanged Northstar role. I've escalated this user and the 07:42 request to Identity Engineering, including a review of other membership changes from the same window.",
+          "timestamp": "2026-07-04T08:53:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Marcus Hill",
+          "text": "The Operations role is still there. Please check the other changes from this morning too; we do not want to discover another user still has access later.",
+          "timestamp": "2026-07-04T10:20:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Identity Engineering",
+          "text": "Cleared the reported membership and replayed the stalled invalidation queue. Security review is still validating all group changes from the affected window.",
+          "timestamp": "2026-07-04T11:15:00",
+          "type": "internal"
+        },
+        {
+          "author": "agent",
+          "name": "Priya Nair",
+          "text": "Identity Engineering replayed the delayed updates and the reported role is gone. I am keeping this pending while Security Operations verifies all memberships from the affected window.",
+          "timestamp": "2026-07-04T12:35:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": "scim_group_cache_stale",
+        "root_cause": "The authorization service did not invalidate cached SCIM group memberships.",
+        "is_trend_seed": true
+      }
+    },
+    {
+      "id": "T-20017",
+      "created_at": "2026-07-05T09:00:00",
+      "subject": "How can we export more than 100,000 audit events?",
+      "body": "I'm trying to export a full quarter of audit events for an external review, but the screen stops at 100,000 rows. Is there another way to get everything without splitting the dates by hand?",
+      "category": "exports",
+      "priority": "low",
+      "status": "resolved",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-105",
+        "name": "Lattice Field",
+        "arr": 18000,
+        "region": "EMEA"
+      },
+      "requester": "Mila Stone",
+      "assignee": "Evan Grant",
+      "channel": "chat",
+      "tags": [
+        "audit-log",
+        "export",
+        "how-to"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Mila Stone",
+          "text": "I'm trying to export a full quarter of audit events for an external review, but the screen stops at 100,000 rows. Is there another way to get everything without splitting the dates by hand?",
+          "timestamp": "2026-07-05T09:00:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Evan Grant",
+          "text": "Yes, you can avoid splitting the dates manually. The Audit Export API runs the export in the background and gives you a download link when it is ready; the 100,000-row UI limit does not apply.",
+          "timestamp": "2026-07-05T09:38:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Mila Stone",
+          "text": "Perfect. Will it split a very large export into manageable files, and how long do we have to download them?",
+          "timestamp": "2026-07-05T11:05:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Evan Grant",
+          "text": "It splits automatically at one million rows, and each signed download link works for 24 hours. I've also sent you an example using your quarter's date range.",
+          "timestamp": "2026-07-05T13:20:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Mila Stone",
+          "text": "The asynchronous export completed in three files, and our auditor can open all of them. Thank you.",
+          "timestamp": "2026-07-05T14:05:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": null,
+        "root_cause": null,
+        "is_trend_seed": false
+      }
+    },
+    {
+      "id": "T-20018",
+      "created_at": "2026-07-05T10:20:00",
+      "subject": "Python SDK v2 migration timeline",
+      "body": "We're planning our Python SDK upgrade and need to budget the work. When does v1 stop receiving security fixes, and is there a practical migration guide for the v2 pagination changes?",
+      "category": "sdk",
+      "priority": "medium",
+      "status": "resolved",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-104",
+        "name": "Juniper Works",
+        "arr": 24000,
+        "region": "APAC"
+      },
+      "requester": "Arun Mehta",
+      "assignee": "Evan Grant",
+      "channel": "email",
+      "tags": [
+        "sdk",
+        "python",
+        "migration",
+        "how-to"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Arun Mehta",
+          "text": "We're planning our Python SDK upgrade and need to budget the work. When does v1 stop receiving security fixes, and is there a practical migration guide for the v2 pagination changes?",
+          "timestamp": "2026-07-05T10:20:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Evan Grant",
+          "text": "You have until December 31, 2026 for SDK v1 security fixes. The v2 guide includes a cursor-pagination adapter, so your team can migrate one client module at a time instead of changing everything at once.",
+          "timestamp": "2026-07-05T10:58:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Arun Mehta",
+          "text": "That makes the timeline much easier. Do we also need to rewrite our webhook signature verification during the upgrade?",
+          "timestamp": "2026-07-05T12:25:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Evan Grant",
+          "text": "No, webhook signature verification stays the same. I've linked the pagination guide and the compatibility matrix for Python 3.10 through 3.13 so your team can plan the remaining changes.",
+          "timestamp": "2026-07-05T14:40:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Arun Mehta",
+          "text": "That answers both questions. We can schedule the SDK migration without changing webhook verification.",
+          "timestamp": "2026-07-05T15:25:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": null,
+        "root_cause": null,
+        "is_trend_seed": false
+      }
+    },
+    {
+      "id": "T-20019",
+      "created_at": "2026-07-05T11:10:00",
+      "subject": "Audit log retention for enterprise workspaces",
+      "body": "Our compliance review is next month, and we need a clear answer on audit retention. Does Enterprise include twelve months, and is there an option to keep records for seven years?",
+      "category": "account",
+      "priority": "low",
+      "status": "resolved",
+      "customer_tier": "enterprise",
+      "account": {
+        "id": "A-101",
+        "name": "Cedar Analytics",
+        "arr": 72000,
+        "region": "AMER"
+      },
+      "requester": "Daria Wells",
+      "assignee": "Sam Rivera",
+      "channel": "email",
+      "tags": [
+        "audit-log",
+        "retention",
+        "compliance",
+        "how-to"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Daria Wells",
+          "text": "Our compliance review is next month, and we need a clear answer on audit retention. Does Enterprise include twelve months, and is there an option to keep records for seven years?",
+          "timestamp": "2026-07-05T11:10:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Sam Rivera",
+          "text": "Enterprise includes twelve months of searchable audit events. For seven-year retention, the compliance archive add-on copies events to encrypted object storage. I can help you confirm whether it fits your review requirements.",
+          "timestamp": "2026-07-05T11:48:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Daria Wells",
+          "text": "The main requirements are EU storage and access limited to one compliance service account. Can the archive support both?",
+          "timestamp": "2026-07-05T13:15:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Sam Rivera",
+          "text": "Yes, both are supported: you can select EU storage and restrict archive access to a dedicated read-only service account. I've sent the configuration checklist for your compliance team.",
+          "timestamp": "2026-07-05T15:30:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Daria Wells",
+          "text": "The EU archive and service-account restriction meet our compliance requirement. We have what we need.",
+          "timestamp": "2026-07-05T16:15:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": null,
+        "root_cause": null,
+        "is_trend_seed": false
+      }
+    },
+    {
+      "id": "T-20020",
+      "created_at": "2026-07-05T12:00:00",
+      "subject": "Cancel unused sandbox add-on at renewal",
+      "body": "We don't use the extra sandbox anymore and want it removed at our August renewal. Please make sure this does not cancel or change our main enterprise workspace.",
+      "category": "account",
+      "priority": "low",
+      "status": "resolved",
+      "customer_tier": "pro",
+      "account": {
+        "id": "A-102",
+        "name": "Brightline Health",
+        "arr": 48000,
+        "region": "AMER"
+      },
+      "requester": "Ben Carter",
+      "assignee": "Sam Rivera",
+      "channel": "chat",
+      "tags": [
+        "account",
+        "add-on",
+        "cancellation",
+        "renewal"
+      ],
+      "messages": [
+        {
+          "author": "customer",
+          "name": "Ben Carter",
+          "text": "We don't use the extra sandbox anymore and want it removed at our August renewal. Please make sure this does not cancel or change our main enterprise workspace.",
+          "timestamp": "2026-07-05T12:00:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Sam Rivera",
+          "text": "I found the sandbox add-on on contract DEMO-42. I can remove only that add-on on the renewal date; your primary workspace and seat count will stay exactly as they are.",
+          "timestamp": "2026-07-05T12:38:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Ben Carter",
+          "text": "Yes, please go ahead. Send me something in writing with the new total so I can give it to Finance.",
+          "timestamp": "2026-07-05T14:05:00",
+          "type": "public"
+        },
+        {
+          "author": "agent",
+          "name": "Sam Rivera",
+          "text": "Done. The sandbox add-on is scheduled to end on August 1, and I've sent confirmation with the revised total. Your production workspace and seats were not changed.",
+          "timestamp": "2026-07-05T16:20:00",
+          "type": "public"
+        },
+        {
+          "author": "customer",
+          "name": "Ben Carter",
+          "text": "The confirmation shows only the sandbox add-on removed and the revised total is correct.",
+          "timestamp": "2026-07-05T17:05:00",
+          "type": "public"
+        }
+      ],
+      "ground_truth": {
+        "cluster_id": null,
+        "root_cause": null,
+        "is_trend_seed": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Trend Detection</title>
+  <script src="https://static.zdassets.com/zendesk_app_framework_sdk/2.0/zaf_sdk.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      color: #2f3941;
+      margin: 0;
+      padding: 12px;
+      background: #fff;
+    }
+    h1 { font-size: 15px; margin: 0 0 4px; }
+    .sub { color: #68737d; margin-bottom: 12px; font-size: 12px; }
+    .metric {
+      background: #f8f9f9; border: 1px solid #e9ebed;
+      padding: 8px 10px; border-radius: 3px; margin-bottom: 12px; font-size: 12px;
+    }
+    button {
+      width: 100%; padding: 8px 12px; border-radius: 4px;
+      border: 1px solid #03363d; background: #03363d; color: #fff;
+      font-size: 13px; cursor: pointer; margin-bottom: 8px;
+    }
+    button:hover { background: #17494d; }
+    button.secondary {
+      background: #fff; color: #2f3941; border-color: #d8dcde;
+    }
+    .loading { color: #68737d; padding: 12px 0; }
+    .error {
+      background: #fde8e8; border-left: 3px solid #cc3340;
+      padding: 8px 10px; border-radius: 3px; margin-bottom: 10px;
+    }
+    .trend-alert {
+      background: #fff8e6; border-left: 3px solid #f5a623;
+      padding: 9px 11px; border-radius: 3px; margin-bottom: 10px;
+    }
+    .trend-ok {
+      background: #f0f9f4; border-left: 3px solid #038153;
+      padding: 9px 11px; border-radius: 3px; margin-bottom: 10px;
+    }
+    .impact {
+      background: #f0f6fc; border-left: 3px solid #1f73b7;
+      padding: 10px 12px; border-radius: 3px; margin-bottom: 12px;
+    }
+    .section {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #68737d; margin: 12px 0 6px;
+    }
+    .similar {
+      background: #f8f9f9; border: 1px solid #e9ebed;
+      border-radius: 3px; padding: 8px 10px; margin-bottom: 6px;
+    }
+    .similar .meta { color: #68737d; font-size: 11px; margin-top: 2px; }
+    details { margin-top: 10px; }
+    summary { cursor: pointer; font-weight: 600; font-size: 12px; }
+    pre {
+      background: #f8f9f9; border: 1px solid #d8dcde;
+      padding: 10px; border-radius: 3px; font-size: 11px;
+      white-space: pre-wrap; max-height: 220px; overflow-y: auto;
+    }
+    .hint { color: #87929d; font-size: 11px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Trend Detection</h1>
+  <div class="sub">Similarity search and trend alerts</div>
+  <div class="metric">Manual review ~2h → Agent ~10 sec</div>
+
+  <button id="analyzeBtn">Analyze ticket</button>
+  <button id="demoBtn" class="secondary">Demo mode (T-0004)</button>
+
+  <div id="status" class="loading" hidden>Analyzing…</div>
+  <div id="error" class="error" hidden></div>
+  <div id="results"></div>
+  <div class="hint" id="hint"></div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+    const client = ZAFClient.init();
+
+    const statusEl = document.getElementById("status");
+    const errorEl = document.getElementById("error");
+    const resultsEl = document.getElementById("results");
+    const hintEl = document.getElementById("hint");
+
+    let zendeskAvailable = false;
+
+    client.on("app.registered", () => {
+      zendeskAvailable = true;
+      hintEl.textContent = "Connected to Zendesk. Analyze uses the open ticket.";
+    });
+
+    client.on("app.error", () => {
+      hintEl.textContent = "Zendesk context unavailable — use Demo mode (T-0004).";
+    });
+
+    setTimeout(() => {
+      if (!zendeskAvailable) {
+        hintEl.textContent = "Local preview — use Demo mode or start API on :8000.";
+      }
+    }, 1500);
+
+    function showLoading(show) {
+      statusEl.hidden = !show;
+      errorEl.hidden = true;
+      if (show) resultsEl.innerHTML = "";
+    }
+
+    function showError(msg) {
+      errorEl.hidden = false;
+      errorEl.textContent = msg;
+      statusEl.hidden = true;
+    }
+
+    async function callApi(payload) {
+      const res = await fetch(`${API_BASE}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `API error ${res.status}`);
+      }
+      return res.json();
+    }
+
+    function renderResults(data) {
+      const trend = data.trend || {};
+      const impact = data.impact || {};
+      const similar = data.similar_tickets || [];
+
+      let html = "";
+      if (trend.is_potential_trend) {
+        html += `<div class="trend-alert"><strong>Potential trend detected</strong><br>
+          ${trend.similar_count} tickets at ≥ ${Math.round(trend.threshold * 100)}% similarity</div>`;
+      } else {
+        html += `<div class="trend-ok"><strong>No trend detected</strong><br>
+          ${trend.similar_count} similar (threshold: ≥10 at ≥${Math.round(trend.threshold * 100)}%)</div>`;
+      }
+
+      if (impact.unique_accounts > 0) {
+        html += `<div class="impact">
+          <div class="section" style="margin-top:0">Customer Impact (Salesforce)</div>
+          • ${impact.unique_accounts} unique accounts<br>
+          • Total ARR at risk: <strong>${impact.arr_at_risk_formatted}</strong>
+        </div>`;
+      }
+
+      html += `<div class="section">Top 5 similar</div>`;
+      similar.forEach((item, i) => {
+        html += `<div class="similar">
+          ${i + 1}. ${escapeHtml(item.subject)}<br>
+          <span class="meta">${item.id} · ${Math.round(item.similarity * 100)}% · ${escapeHtml(item.category)}</span>
+        </div>`;
+      });
+
+      if (data.engineering_draft_text) {
+        html += `<details><summary>Engineering draft</summary>
+          <pre>${escapeHtml(data.engineering_draft_text)}</pre></details>`;
+      }
+
+      resultsEl.innerHTML = html;
+      statusEl.hidden = true;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text || "";
+      return div.innerHTML;
+    }
+
+    async function analyzeTicket() {
+      showLoading(true);
+      try {
+        const ticket = await client.get("ticket");
+        const subject = ticket.ticket.subject || "";
+        const description = ticket.ticket.description || "";
+        const externalId = ticket.ticket.externalId;
+
+        let data;
+        if (externalId && /^T-\d+$/i.test(externalId)) {
+          data = await callApi({ ticket_id: externalId });
+        } else {
+          data = await callApi({ subject, body: description });
+        }
+        renderResults(data);
+      } catch (err) {
+        showError(err.message || "Analysis failed. Is the API running on :8000?");
+      }
+    }
+
+    async function analyzeDemo() {
+      showLoading(true);
+      try {
+        const data = await callApi({ ticket_id: "T-0004" });
+        renderResults(data);
+      } catch (err) {
+        showError(err.message || "Demo failed. Start API: uvicorn api.main:app --port 8000");
+      }
+    }
+
+    document.getElementById("analyzeBtn").addEventListener("click", analyzeTicket);
+    document.getElementById("demoBtn").addEventListener("click", analyzeDemo);
+  </script>
+</body>
+</html>

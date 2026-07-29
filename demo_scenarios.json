@@ -1,0 +1,22 @@
+{
+  "scenarios": [
+    {
+      "ticket_id": "T-20119",
+      "label": "API - production key rotation failures",
+      "subject": "API rotation left production authentication broken",
+      "category": "api"
+    },
+    {
+      "ticket_id": "T-20139",
+      "label": "Webhooks - EU delivery backlog",
+      "subject": "No delivery attempts for queued EU events",
+      "category": "webhooks"
+    },
+    {
+      "ticket_id": "T-20159",
+      "label": "Billing - duplicate invoice proration",
+      "subject": "One account change created two invoice entries",
+      "category": "billing"
+    }
+  ]
+}

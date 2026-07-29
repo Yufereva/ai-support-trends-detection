@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Synthetic B2B SaaS Support Ticket v2",
+  "type": "object",
+  "required": [
+    "id",
+    "created_at",
+    "subject",
+    "body",
+    "category",
+    "priority",
+    "status",
+    "customer_tier",
+    "account",
+    "requester",
+    "channel",
+    "tags",
+    "messages",
+    "ground_truth"
+  ],
+  "properties": {
+    "id": {"type": "string", "pattern": "^T-[0-9]{5}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "subject": {"type": "string", "minLength": 12},
+    "body": {"type": "string", "minLength": 30},
+    "category": {
+      "type": "string",
+      "enum": ["api", "webhooks", "billing", "identity", "exports", "sdk", "account"]
+    },
+    "priority": {"type": "string", "enum": ["low", "medium", "high", "urgent"]},
+    "status": {"type": "string", "enum": ["open", "pending", "resolved", "closed"]},
+    "customer_tier": {"type": "string", "enum": ["free", "pro", "enterprise"]},
+    "account": {
+      "type": "object",
+      "required": ["id", "name", "arr", "region"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "arr": {"type": "integer", "minimum": 0},
+        "region": {"type": "string", "enum": ["AMER", "EMEA", "APAC"]}
+      }
+    },
+    "requester": {"type": "string"},
+    "channel": {"type": "string", "enum": ["email", "chat", "api"]},
+    "tags": {"type": "array", "items": {"type": "string"}},
+    "messages": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["author", "name", "text", "timestamp", "type"],
+        "properties": {
+          "author": {"type": "string", "enum": ["customer", "agent"]},
+          "name": {"type": "string"},
+          "text": {"type": "string", "minLength": 12},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "type": {"type": "string", "enum": ["public", "internal"]}
+        }
+      }
+    },
+    "ground_truth": {
+      "type": "object",
+      "required": ["cluster_id", "root_cause", "is_trend_seed"],
+      "properties": {
+        "cluster_id": {"type": ["string", "null"]},
+        "topic_id": {"type": ["string", "null"]},
+        "is_emerging_trend": {"type": "boolean"},
+        "root_cause": {"type": ["string", "null"]},
+        "is_trend_seed": {"type": "boolean"}
+      }
+    }
+  }
+}

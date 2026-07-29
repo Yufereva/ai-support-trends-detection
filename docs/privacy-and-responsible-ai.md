@@ -6,7 +6,7 @@ All committed sample data in this repository is synthetic. No real customer data
 
 ## PII Minimization
 
-Any future operational use should minimize personally identifiable information before analysis. Ticket text should be redacted or transformed so trend analysis does not require direct exposure to sensitive customer details.
+The current MVP accepts only its committed synthetic dataset. Any future operational use should minimize and redact personally identifiable information before analysis.
 
 ## Secret Management
 
@@ -18,11 +18,11 @@ The system produces recommendations for human review. It should not automaticall
 
 ## Explainability
 
-The MVP uses transparent signals: ticket volume, prior-period comparison, growth, customer tier representation, product area, and supporting ticket IDs.
+The MVP exposes the similarity threshold, time window, minimum count, category guard, similarity scores, supporting ticket IDs, and fictional account-impact context.
 
 ## Confidence
 
-Confidence is based on simple observable signals, not model certainty. Reviewers should treat confidence as a triage aid, not as proof.
+Similarity is a semantic-distance signal, not model certainty or proof of one root cause. Reviewers should treat warnings as triage aids.
 
 ## False Positives And False Negatives
 

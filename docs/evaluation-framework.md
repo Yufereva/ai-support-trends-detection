@@ -1,33 +1,34 @@
 # Evaluation Framework
 
-This framework separates what can be evaluated with the synthetic dataset from what requires a real operational pilot.
+## Synthetic Evaluation
 
-## Metrics Testable With Synthetic Data
+`data/synthetic/full_dataset.json` contains explicit ground-truth labels for seeded trends and ordinary support cases. Run:
 
-| Metric | How to evaluate |
-|---|---|
-| Cluster coherence | Review whether top tickets in a detected trend share the same theme |
-| Trend precision | Measure how many detected synthetic trends match intentionally seeded themes |
-| False-positive rate | Count detected trends that map to unrelated background tickets |
-| Evidence coverage | Verify each trend includes supporting ticket IDs and product areas |
-| Determinism | Re-run the pipeline and compare output order and scores |
-| Stability | Change the window slightly and inspect whether major trends remain visible |
+```bash
+python data/synthetic/evaluate_full_dataset.py
+```
 
-## Metrics Requiring An Operational Pilot
+The evaluation reports precision, recall, F1, false positives, and false negatives for the fixed incoming-ticket rule. Golden-sample files support manual conversation and semantic-coherence review.
 
-| Metric | Why synthetic data is insufficient |
-|---|---|
-| Trend recall | Requires known real-world issue labels |
-| Time-to-detection | Requires historical operational timelines |
-| Reviewer acceptance rate | Requires support leader review |
-| Manual analysis time saved | Requires comparison with existing team workflow |
-| Escalation quality | Requires Product and Engineering feedback |
+## Regression Coverage
 
-## Suggested Review Process
+Automated tests cover:
 
-1. Run the pipeline on a labeled historical ticket export.
-2. Have support leaders review detected trends.
-3. Compare detected themes with known escalations or incidents.
-4. Track accepted, rejected, and missed trends.
-5. Tune thresholds and confidence explanations.
-6. Re-run evaluation before any operational rollout.
+- trend and non-trend batch decisions;
+- the same-category false-positive guard;
+- automatic warning payloads from the incoming webhook;
+- similar-ticket evidence in Jira drafts;
+- graceful handling of stale ticket references in the local Jira backlog.
+
+## Production Evaluation Needed
+
+Synthetic results cannot establish production accuracy. A real pilot would need approved historical data and measure:
+
+- recall against known escalations;
+- reviewer acceptance, revision, and rejection rates;
+- time to detect a review-worthy issue;
+- false-positive burden on support agents;
+- evidence quality rated by Product and Engineering;
+- performance across languages, products, and changing ticket volume.
+
+Thresholds should be calibrated in shadow mode before any operational action is enabled.
