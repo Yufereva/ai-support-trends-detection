@@ -22,6 +22,8 @@ A full walkthrough of the T-20179 SCIM/identity trend, from the ticket flagging 
 
 [Watch the demo video](assets/demo-video.mp4)
 
+The video uses T-20179. The reproducible README example below uses T-20119.
+
 ## Product Workflow
 
 ```mermaid
@@ -203,6 +205,7 @@ The application drafts evidence; it does not autonomously declare incidents, set
 - Local demo integrations rather than authenticated Zendesk, Jira, or CRM connections.
 - The embedding model may miss novel wording or group semantically close but operationally distinct issues.
 - Category labels are assumed to exist and be correct.
+- The fixed 0.60 similarity threshold and seven-day window would need calibration for real ticket volume.
 - No production security, access-control, retention, or monitoring layer.
 - Suggested impact and priority require human validation.
 
